@@ -62,6 +62,25 @@ Já modelado em `prisma/schema.prisma`:
 driver adapter explícito (`PrismaPg`) — ver `.agents/skills/prisma-postgres-setup/references/prisma7-client.md`
 para o padrão de instanciação.
 
+## Banco de dados local (Docker)
+
+Por enquanto rodamos Postgres local via `docker-compose.yml` (na raiz do
+projeto) para testar tudo antes de migrar pro Supabase. Comandos:
+
+```
+docker compose up -d      # sobe o Postgres local
+docker compose down       # derruba (mantém os dados no volume)
+```
+
+**Porta 5433, não 5432** — a 5432 já está ocupada por um Postgres nativo
+instalado no Windows desta máquina, então o container é mapeado em
+`5433:5432`. O `.env` local aponta para `localhost:5433`.
+
+Quando migrar para Supabase: só trocar o `DATABASE_URL` no `.env` pela
+connection string do Supabase e rodar `prisma migrate deploy` — o schema e a
+lógica não mudam, é só a origem da conexão (essa era a ideia de já usar o
+driver adapter do Prisma desde o início).
+
 ## Dashboard — indicadores esperados
 
 Faturamento por dia/semana/mês, ticket médio, distribuição por forma de
@@ -80,9 +99,9 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
    (create-next-app feito, git inicializado, Prisma 7 instalado e configurado
    com driver adapter, schema.prisma modelado)
 2. **Modelagem do `schema.prisma` + migrations + seed** ← *estamos aqui*
-   (schema já escrito; falta rodar `prisma migrate dev` — depende de uma
-   `DATABASE_URL` real de Neon/Supabase no `.env`, ainda não configurada — e
-   escrever o seed)
+   (schema escrito, Postgres local via Docker rodando, migration inicial
+   aplicada e conexão confirmada de ponta a ponta; falta escrever o seed e,
+   quando fizer sentido, trocar o `DATABASE_URL` para um Supabase real)
 3. API REST + autenticação (CRUD de vendas)
 4. Tela de registro de vendas
 5. Dashboard e relatórios
@@ -97,9 +116,11 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 ## Status atual
 
-Prisma 7 instalado e configurado (driver adapter para PostgreSQL) e
-`schema.prisma` modelado com as 6 entidades do domínio. Falta: (1) uma
-`DATABASE_URL` real (Neon ou Supabase) para rodar `prisma migrate dev`, e
-(2) um script de seed. A **Introdução da monografia** (contextualização,
+Prisma 7 instalado e configurado (driver adapter para PostgreSQL),
+`schema.prisma` modelado com as 6 entidades do domínio, Postgres local
+rodando via Docker (porta 5433) e a migration inicial já aplicada — conexão
+via `PrismaClient` confirmada de ponta a ponta. Falta: (1) um script de seed,
+e (2) mais pra frente, trocar o `DATABASE_URL` local por um Supabase real
+antes de ir pra produção. A **Introdução da monografia** (contextualização,
 problema de pesquisa, justificativa, objetivos, metodologia e estrutura) já foi
 redigida nas atividades da disciplina.
