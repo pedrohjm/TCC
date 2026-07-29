@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/app/generated/prisma
+
+# prisma agent-editor skill bundles (auto-installed by `prisma init`, not app code)
+/.agents/
+/.claude/skills/
+/.windsurf/
+/skills-lock.json

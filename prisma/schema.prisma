@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Papel {
+  DONO
+  ATENDENTE
+}
+
+enum FormaPagamento {
+  DINHEIRO
+  CARTAO
+  PIX
+}
+
+enum StatusReserva {
+  PENDENTE
+  CONCLUIDA
+  CANCELADA
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senhaHash String
+  papel     Papel    @default(ATENDENTE)
+  vendas    Venda[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Produto {
+  id         Int         @id @default(autoincrement())
+  nome       String
+  preco      Decimal     @db.Decimal(10, 2)
+  ativo      Boolean     @default(true)
+  itensVenda ItemVenda[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model Venda {
+  id             Int            @id @default(autoincrement())
+  valorTotal     Decimal        @db.Decimal(10, 2)
+  formaPagamento FormaPagamento
+  dataHora       DateTime       @default(now())
+  reservaId      Int?
+  reserva        Reserva?       @relation(fields: [reservaId], references: [id])
+  usuarioId      Int
+  usuario        Usuario        @relation(fields: [usuarioId], references: [id])
+  itens          ItemVenda[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model ItemVenda {
+  id            Int     @id @default(autoincrement())
+  vendaId       Int
+  venda         Venda   @relation(fields: [vendaId], references: [id])
+  produtoId     Int
+  produto       Produto @relation(fields: [produtoId], references: [id])
+  quantidade    Int
+  precoUnitario Decimal @db.Decimal(10, 2)
+}
+
+model Reserva {
+  id          Int           @id @default(autoincrement())
+  nomeCliente String
+  data        DateTime
+  status      StatusReserva @default(PENDENTE)
+  vendas      Venda[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model FechamentoCaixa {
+  id            Int      @id @default(autoincrement())
+  data          DateTime @unique
+  totalDinheiro Decimal  @db.Decimal(10, 2)
+  totalCartao   Decimal  @db.Decimal(10, 2)
+  totalPix      Decimal  @db.Decimal(10, 2)
+  observacoes   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
