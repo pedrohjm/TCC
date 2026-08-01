@@ -65,7 +65,7 @@ model Venda {
 model ItemVenda {
   id            Int     @id @default(autoincrement())
   vendaId       Int
-  venda         Venda   @relation(fields: [vendaId], references: [id])
+  venda         Venda   @relation(fields: [vendaId], references: [id], onDelete: Cascade)
   produtoId     Int
   produto       Produto @relation(fields: [produtoId], references: [id])
   quantidade    Int
