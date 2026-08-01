@@ -98,11 +98,11 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 1. ~~Setup — create-next-app, Git/GitHub, Prisma + PostgreSQL~~ ✅ concluído
    (create-next-app feito, git inicializado, Prisma 7 instalado e configurado
    com driver adapter, schema.prisma modelado)
-2. **Modelagem do `schema.prisma` + migrations + seed** ← *estamos aqui*
+2. ~~Modelagem do `schema.prisma` + migrations + seed~~ ✅ concluído
    (schema escrito, Postgres local via Docker rodando, migration inicial
-   aplicada e conexão confirmada de ponta a ponta; falta escrever o seed e,
-   quando fizer sentido, trocar o `DATABASE_URL` para um Supabase real)
-3. API REST + autenticação (CRUD de vendas)
+   aplicada, `prisma/seed.ts` populando dados de exemplo — 2 usuários, 5
+   produtos, 2 reservas, 3 vendas, 1 fechamento de caixa)
+3. **API REST + autenticação (CRUD de vendas)** ← *estamos aqui*
 4. Tela de registro de vendas
 5. Dashboard e relatórios
 6. Avaliação (métricas de tempo/erros + questionário SUS) e escrita da monografia
@@ -116,11 +116,12 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 ## Status atual
 
-Prisma 7 instalado e configurado (driver adapter para PostgreSQL),
-`schema.prisma` modelado com as 6 entidades do domínio, Postgres local
-rodando via Docker (porta 5433) e a migration inicial já aplicada — conexão
-via `PrismaClient` confirmada de ponta a ponta. Falta: (1) um script de seed,
-e (2) mais pra frente, trocar o `DATABASE_URL` local por um Supabase real
-antes de ir pra produção. A **Introdução da monografia** (contextualização,
-problema de pesquisa, justificativa, objetivos, metodologia e estrutura) já foi
-redigida nas atividades da disciplina.
+Etapas 1 e 2 do roadmap concluídas: Prisma 7 configurado (driver adapter para
+PostgreSQL), `schema.prisma` com as 6 entidades do domínio, Postgres local
+via Docker (porta 5433), migration inicial aplicada e `prisma/seed.ts`
+populando dados de exemplo (`npx prisma db seed`). Falta, mais pra frente,
+trocar o `DATABASE_URL` local por um Supabase real antes de ir pra produção.
+Próximo passo técnico: rotas da API REST em `/app/api` (CRUD de vendas) e
+autenticação. A **Introdução da monografia** (contextualização, problema de
+pesquisa, justificativa, objetivos, metodologia e estrutura) já foi redigida
+nas atividades da disciplina.
