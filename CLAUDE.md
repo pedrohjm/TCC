@@ -102,7 +102,14 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
    (schema escrito, Postgres local via Docker rodando, migration inicial
    aplicada, `prisma/seed.ts` populando dados de exemplo — 2 usuários, 5
    produtos, 2 reservas, 3 vendas, 1 fechamento de caixa)
-3. **API REST + autenticação (CRUD de vendas)** ← *estamos aqui*
+3. API REST + autenticação
+   - ~~CRUD de vendas (`/app/api/vendas`)~~ ✅ concluído (GET com filtro por
+     dia, POST valida com Zod e recalcula o preço a partir do banco, GET por
+     id, PATCH, DELETE com cascade nos itens)
+   - **Autenticação (NextAuth/JWT, papéis DONO/ATENDENTE)** ← *estamos aqui*
+     (por enquanto `usuarioId` vem no corpo da requisição, sem checar quem
+     está logado — inseguro, é só provisório até isto entrar)
+   - CRUD de Produto e Reserva (ainda não têm rota própria)
 4. Tela de registro de vendas
 5. Dashboard e relatórios
 6. Avaliação (métricas de tempo/erros + questionário SUS) e escrita da monografia
@@ -116,12 +123,12 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 ## Status atual
 
-Etapas 1 e 2 do roadmap concluídas: Prisma 7 configurado (driver adapter para
-PostgreSQL), `schema.prisma` com as 6 entidades do domínio, Postgres local
-via Docker (porta 5433), migration inicial aplicada e `prisma/seed.ts`
-populando dados de exemplo (`npx prisma db seed`). Falta, mais pra frente,
-trocar o `DATABASE_URL` local por um Supabase real antes de ir pra produção.
-Próximo passo técnico: rotas da API REST em `/app/api` (CRUD de vendas) e
-autenticação. A **Introdução da monografia** (contextualização, problema de
-pesquisa, justificativa, objetivos, metodologia e estrutura) já foi redigida
-nas atividades da disciplina.
+Etapas 1 e 2 do roadmap concluídas. Na etapa 3, o CRUD de vendas já está no
+ar em `/app/api/vendas` (GET/POST/PATCH/DELETE, validado com Zod, preço
+sempre recalculado a partir do banco). Falta autenticação (NextAuth/JWT com
+papéis DONO/ATENDENTE) — hoje qualquer requisição pode informar qualquer
+`usuarioId`, o que é inseguro e só serve pra testar o CRUD por enquanto — e
+as rotas de Produto/Reserva. Mais pra frente, trocar o `DATABASE_URL` local
+por um Supabase real antes de ir pra produção. A **Introdução da monografia**
+(contextualização, problema de pesquisa, justificativa, objetivos,
+metodologia e estrutura) já foi redigida nas atividades da disciplina.
