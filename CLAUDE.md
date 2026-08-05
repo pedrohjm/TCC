@@ -81,6 +81,13 @@ connection string do Supabase e rodar `prisma migrate deploy` — o schema e a
 lógica não mudam, é só a origem da conexão (essa era a ideia de já usar o
 driver adapter do Prisma desde o início).
 
+## Variáveis de ambiente (`.env`, nunca commitado)
+
+- `DATABASE_URL` — connection string do Postgres (ver seção acima)
+- `AUTH_SECRET` — chave usada pelo NextAuth pra assinar o JWT de sessão.
+  Gerar uma nova por ambiente com:
+  `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
+
 ## Dashboard — indicadores esperados
 
 Faturamento por dia/semana/mês, ticket médio, distribuição por forma de
@@ -110,10 +117,13 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
      `/app/api/reservas` — GET/POST/PATCH/DELETE, ambos bloqueiam DELETE
      com 409 quando há vínculo com uma venda, sugerindo desativar/cancelar
      em vez de apagar)
-   - **Autenticação (NextAuth/JWT, papéis DONO/ATENDENTE)** ← *estamos aqui*
-     (por enquanto `usuarioId` vem no corpo da requisição, sem checar quem
-     está logado — inseguro, é só provisório até isto entrar)
-4. Tela de registro de vendas
+   - ~~Autenticação (NextAuth/JWT, papéis DONO/ATENDENTE)~~ ✅ concluído
+     (Auth.js v5, credentials provider com bcrypt, sessão JWT, login em
+     `/login`. `usuarioId` na venda vem da sessão, não mais do corpo da
+     requisição. Toda rota de `/app/api` exige sessão; DELETE de
+     venda/produto/reserva e criar/editar/apagar produto são exclusivos
+     do DONO — o ATENDENTE só opera o dia a dia)
+4. **Tela de registro de vendas** ← *estamos aqui*
 5. Dashboard e relatórios
 6. Avaliação (métricas de tempo/erros + questionário SUS) e escrita da monografia
 
@@ -126,16 +136,18 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 ## Status atual
 
-Etapas 1 e 2 do roadmap concluídas. Na etapa 3, o CRUD completo de Venda,
-Produto e Reserva já está no ar em `/app/api` (validado com Zod, preço da
-venda sempre recalculado a partir do banco, DELETE bloqueado com 409 quando
-haveria perda de histórico). Falta só a autenticação (NextAuth/JWT com
-papéis DONO/ATENDENTE) — hoje qualquer requisição pode informar qualquer
-`usuarioId`, o que é inseguro e só serve pra testar o CRUD por enquanto.
-Mais pra frente, trocar o `DATABASE_URL` local por um Supabase real antes de
-ir pra produção. A **Introdução da monografia** (contextualização, problema
-de pesquisa, justificativa, objetivos, metodologia e estrutura) já foi
-redigida nas atividades da disciplina.
+Etapas 1, 2 e 3 do roadmap concluídas: CRUD completo de Venda, Produto e
+Reserva em `/app/api` (validado com Zod, preço da venda sempre recalculado a
+partir do banco) protegido por autenticação (Auth.js v5, credentials + JWT,
+login em `/login`). Login de teste: `ana@sorveteria.com` (DONO) /
+`joao@sorveteria.com` (ATENDENTE), senha `123456` (gerada pelo
+`prisma/seed.ts` — nunca usar essa senha fora de dev local). Próximo passo
+técnico: a tela de registro de vendas (etapa 4), a mais crítica pra
+avaliação do TCC — precisa ser mais rápida que o caderno. Mais pra frente,
+trocar o `DATABASE_URL` local por um Supabase real antes de ir pra produção.
+A **Introdução da monografia** (contextualização, problema de pesquisa,
+justificativa, objetivos, metodologia e estrutura) já foi redigida nas
+atividades da disciplina.
 
 **Decisão de escopo (2026-08-05):** Reserva é só um agendamento (nome do
 cliente, data, status) — não tem valor nem pagamento, e não gera uma Venda
