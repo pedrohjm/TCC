@@ -106,10 +106,13 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
    - ~~CRUD de vendas (`/app/api/vendas`)~~ ✅ concluído (GET com filtro por
      dia, POST valida com Zod e recalcula o preço a partir do banco, GET por
      id, PATCH, DELETE com cascade nos itens)
+   - ~~CRUD de Produto e Reserva~~ ✅ concluído (`/app/api/produtos`,
+     `/app/api/reservas` — GET/POST/PATCH/DELETE, ambos bloqueiam DELETE
+     com 409 quando há vínculo com uma venda, sugerindo desativar/cancelar
+     em vez de apagar)
    - **Autenticação (NextAuth/JWT, papéis DONO/ATENDENTE)** ← *estamos aqui*
      (por enquanto `usuarioId` vem no corpo da requisição, sem checar quem
      está logado — inseguro, é só provisório até isto entrar)
-   - CRUD de Produto e Reserva (ainda não têm rota própria)
 4. Tela de registro de vendas
 5. Dashboard e relatórios
 6. Avaliação (métricas de tempo/erros + questionário SUS) e escrita da monografia
@@ -123,12 +126,20 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 ## Status atual
 
-Etapas 1 e 2 do roadmap concluídas. Na etapa 3, o CRUD de vendas já está no
-ar em `/app/api/vendas` (GET/POST/PATCH/DELETE, validado com Zod, preço
-sempre recalculado a partir do banco). Falta autenticação (NextAuth/JWT com
+Etapas 1 e 2 do roadmap concluídas. Na etapa 3, o CRUD completo de Venda,
+Produto e Reserva já está no ar em `/app/api` (validado com Zod, preço da
+venda sempre recalculado a partir do banco, DELETE bloqueado com 409 quando
+haveria perda de histórico). Falta só a autenticação (NextAuth/JWT com
 papéis DONO/ATENDENTE) — hoje qualquer requisição pode informar qualquer
-`usuarioId`, o que é inseguro e só serve pra testar o CRUD por enquanto — e
-as rotas de Produto/Reserva. Mais pra frente, trocar o `DATABASE_URL` local
-por um Supabase real antes de ir pra produção. A **Introdução da monografia**
-(contextualização, problema de pesquisa, justificativa, objetivos,
-metodologia e estrutura) já foi redigida nas atividades da disciplina.
+`usuarioId`, o que é inseguro e só serve pra testar o CRUD por enquanto.
+Mais pra frente, trocar o `DATABASE_URL` local por um Supabase real antes de
+ir pra produção. A **Introdução da monografia** (contextualização, problema
+de pesquisa, justificativa, objetivos, metodologia e estrutura) já foi
+redigida nas atividades da disciplina.
+
+**Decisão de escopo (2026-08-05):** Reserva é só um agendamento (nome do
+cliente, data, status) — não tem valor nem pagamento, e não gera uma Venda
+automaticamente no sistema. Quando o cliente retira o produto reservado, a
+venda em si acontece por fora do app (sem registro). `Venda.reservaId`
+continua existindo e é opcional, só para o caso raro de alguém querer
+vincular manualmente uma venda a uma reserva.
