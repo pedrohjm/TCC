@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { criarProdutoSchema } from '@/lib/validations/produto'
+import { exigirSessao, exigirDono } from '@/lib/auth-helpers'
 
 export async function GET(request: NextRequest) {
+  const { erro: erroSessao } = await exigirSessao()
+  if (erroSessao) return erroSessao
+
   const { searchParams } = new URL(request.url)
   const ativoParam = searchParams.get('ativo') // "true" | "false" | ausente (todos)
 
@@ -22,6 +26,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { sessao, erro: erroSessao } = await exigirSessao()
+  if (erroSessao) return erroSessao
+  const erroPermissao = exigirDono(sessao)
+  if (erroPermissao) return erroPermissao
+
   const corpo = await request.json().catch(() => null)
   const resultado = criarProdutoSchema.safeParse(corpo)
 

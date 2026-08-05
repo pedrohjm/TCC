@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@/app/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
 import { atualizarVendaSchema } from '@/lib/validations/venda'
+import { exigirSessao, exigirDono } from '@/lib/auth-helpers'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -17,6 +18,9 @@ function converterId(idTexto: string): number | null {
 }
 
 export async function GET(_request: NextRequest, { params }: Params) {
+  const { erro: erroSessao } = await exigirSessao()
+  if (erroSessao) return erroSessao
+
   const id = converterId((await params).id)
   if (!id) {
     return NextResponse.json({ erro: 'ID inválido' }, { status: 400 })
@@ -31,6 +35,9 @@ export async function GET(_request: NextRequest, { params }: Params) {
 }
 
 export async function PATCH(request: NextRequest, { params }: Params) {
+  const { erro: erroSessao } = await exigirSessao()
+  if (erroSessao) return erroSessao
+
   const id = converterId((await params).id)
   if (!id) {
     return NextResponse.json({ erro: 'ID inválido' }, { status: 400 })
@@ -68,6 +75,11 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(_request: NextRequest, { params }: Params) {
+  const { sessao, erro: erroSessao } = await exigirSessao()
+  if (erroSessao) return erroSessao
+  const erroPermissao = exigirDono(sessao)
+  if (erroPermissao) return erroPermissao
+
   const id = converterId((await params).id)
   if (!id) {
     return NextResponse.json({ erro: 'ID inválido' }, { status: 400 })

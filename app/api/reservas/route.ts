@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { criarReservaSchema, statusReserva } from '@/lib/validations/reserva'
+import { exigirSessao } from '@/lib/auth-helpers'
 
 export async function GET(request: NextRequest) {
+  const { erro: erroSessao } = await exigirSessao()
+  if (erroSessao) return erroSessao
+
   const { searchParams } = new URL(request.url)
   const status = searchParams.get('status')
 
@@ -22,6 +26,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { erro: erroSessao } = await exigirSessao()
+  if (erroSessao) return erroSessao
+
   const corpo = await request.json().catch(() => null)
   const resultado = criarReservaSchema.safeParse(corpo)
 

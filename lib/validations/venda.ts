@@ -3,7 +3,6 @@ import { z } from 'zod'
 export const formasPagamento = ['DINHEIRO', 'CARTAO', 'PIX'] as const
 
 export const criarVendaSchema = z.object({
-  usuarioId: z.number().int().positive(),
   formaPagamento: z.enum(formasPagamento),
   reservaId: z.number().int().positive().optional(),
   itens: z

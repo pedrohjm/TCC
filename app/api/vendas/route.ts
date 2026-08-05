@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { criarVendaSchema } from '@/lib/validations/venda'
+import { exigirSessao } from '@/lib/auth-helpers'
 
 const incluirRelacoes = {
   itens: { include: { produto: true } },
@@ -9,6 +10,9 @@ const incluirRelacoes = {
 } as const
 
 export async function GET(request: NextRequest) {
+  const { erro: erroSessao } = await exigirSessao()
+  if (erroSessao) return erroSessao
+
   const { searchParams } = new URL(request.url)
   const data = searchParams.get('data') // AAAA-MM-DD, filtra as vendas de um único dia
 
@@ -36,6 +40,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { sessao, erro: erroSessao } = await exigirSessao()
+  if (erroSessao) return erroSessao
+
   const corpo = await request.json().catch(() => null)
   const resultado = criarVendaSchema.safeParse(corpo)
 
@@ -46,12 +53,8 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const { usuarioId, formaPagamento, reservaId, itens } = resultado.data
-
-  const usuario = await prisma.usuario.findUnique({ where: { id: usuarioId } })
-  if (!usuario) {
-    return NextResponse.json({ erro: 'Usuário não encontrado' }, { status: 400 })
-  }
+  const { formaPagamento, reservaId, itens } = resultado.data
+  const usuarioId = Number(sessao.user.id)
 
   if (reservaId) {
     const reserva = await prisma.reserva.findUnique({ where: { id: reservaId } })

@@ -1,11 +1,16 @@
 import 'dotenv/config'
 import pg from 'pg'
+import bcrypt from 'bcryptjs'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../app/generated/prisma/client.js'
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
+
+// Senha única pros dois usuários de teste — só pra desenvolvimento local,
+// nunca use algo assim fora do seed.
+const SENHA_TESTE = '123456'
 
 async function limparBanco() {
   // Ordem respeita as chaves estrangeiras (dependentes primeiro).
@@ -20,13 +25,14 @@ async function limparBanco() {
 async function main() {
   await limparBanco()
 
+  const senhaHash = await bcrypt.hash(SENHA_TESTE, 10)
+
   const [dona, atendente] = await Promise.all([
     prisma.usuario.create({
       data: {
         nome: 'Ana Souza',
         email: 'ana@sorveteria.com',
-        // TODO: gerar hash de verdade quando a autenticação (etapa 3) for implementada.
-        senhaHash: 'seed-placeholder-hash',
+        senhaHash,
         papel: 'DONO',
       },
     }),
@@ -34,7 +40,7 @@ async function main() {
       data: {
         nome: 'João Pereira',
         email: 'joao@sorveteria.com',
-        senhaHash: 'seed-placeholder-hash',
+        senhaHash,
         papel: 'ATENDENTE',
       },
     }),
@@ -118,6 +124,7 @@ async function main() {
   void casquinhaDupla
 
   console.log('Seed concluído: 2 usuários, 5 produtos, 2 reservas, 3 vendas, 1 fechamento de caixa.')
+  console.log(`Login de teste: ana@sorveteria.com / joao@sorveteria.com — senha "${SENHA_TESTE}"`)
 }
 
 main()
