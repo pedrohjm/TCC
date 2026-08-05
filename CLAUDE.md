@@ -62,6 +62,12 @@ Já modelado em `prisma/schema.prisma`:
 driver adapter explícito (`PrismaPg`) — ver `.agents/skills/prisma-postgres-setup/references/prisma7-client.md`
 para o padrão de instanciação.
 
+**Nota Next.js 16 (breaking change vs. treino do modelo — ver `AGENTS.md`):**
+o arquivo `middleware.ts` foi renomeado pra `proxy.ts` (`export default
+function proxy(...)`), e agora roda no runtime **Node.js por padrão** (antes
+era Edge, que não suporta módulos nativos do Node como os que o Prisma usa).
+Isso é o que permite `proxy.ts` proteger páginas sem dar erro de import.
+
 ## Banco de dados local (Docker)
 
 Por enquanto rodamos Postgres local via `docker-compose.yml` (na raiz do
@@ -123,8 +129,13 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
      requisição. Toda rota de `/app/api` exige sessão; DELETE de
      venda/produto/reserva e criar/editar/apagar produto são exclusivos
      do DONO — o ATENDENTE só opera o dia a dia)
-4. **Tela de registro de vendas** ← *estamos aqui*
-5. Dashboard e relatórios
+4. ~~Tela de registro de vendas~~ ✅ concluído — versão **funcional, sem
+   design** (o protótipo visual fica por conta do usuário; isto aqui só
+   valida o comportamento). `app/page.tsx` + `components/TelaRegistroVendas.tsx`:
+   grid de produtos, carrinho, forma de pagamento, atalhos de teclado
+   (1-9 produto, D/C/P pagamento, Enter finaliza, Esc limpa). Páginas
+   protegidas por `proxy.ts` (redireciona pro `/login` sem sessão).
+5. **Dashboard e relatórios** ← *estamos aqui*
 6. Avaliação (métricas de tempo/erros + questionário SUS) e escrita da monografia
 
 ## Convenções de código
@@ -136,15 +147,15 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 ## Status atual
 
-Etapas 1, 2 e 3 do roadmap concluídas: CRUD completo de Venda, Produto e
-Reserva em `/app/api` (validado com Zod, preço da venda sempre recalculado a
-partir do banco) protegido por autenticação (Auth.js v5, credentials + JWT,
-login em `/login`). Login de teste: `ana@sorveteria.com` (DONO) /
+Etapas 1 a 4 do roadmap concluídas: CRUD completo de Venda, Produto e Reserva
+em `/app/api`, autenticação (Auth.js v5, credentials + JWT, login em
+`/login`) e a tela de registro de vendas em `/` (funcional, sem design —
+grid de produtos, carrinho, atalhos de teclado). Páginas protegidas por
+`proxy.ts`. Login de teste: `ana@sorveteria.com` (DONO) /
 `joao@sorveteria.com` (ATENDENTE), senha `123456` (gerada pelo
 `prisma/seed.ts` — nunca usar essa senha fora de dev local). Próximo passo
-técnico: a tela de registro de vendas (etapa 4), a mais crítica pra
-avaliação do TCC — precisa ser mais rápida que o caderno. Mais pra frente,
-trocar o `DATABASE_URL` local por um Supabase real antes de ir pra produção.
+técnico: dashboard e relatórios (etapa 5). Mais pra frente, trocar o
+`DATABASE_URL` local por um Supabase real antes de ir pra produção.
 A **Introdução da monografia** (contextualização, problema de pesquisa,
 justificativa, objetivos, metodologia e estrutura) já foi redigida nas
 atividades da disciplina.
