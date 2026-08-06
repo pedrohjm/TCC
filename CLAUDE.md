@@ -155,8 +155,10 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
    dia) — o gráfico de faturamento por dia mostra só o agregado, então essa
    lista é o detalhamento por trás dele. Usa `GET /api/vendas?mes=AAAA-MM`
    (mesmo endpoint do CRUD de vendas, só ganhou esse filtro a mais).
-6. **Avaliação (métricas de tempo/erros + questionário SUS) e escrita da
-   monografia** ← *estamos aqui*
+6. Avaliação (métricas de tempo/erros + questionário SUS) e escrita da
+   monografia — **adiado a pedido do usuário (2026-08-06)**: só será feito
+   quando o sistema estiver finalizado, não faz sentido rodar o período
+   experimental num sistema ainda incompleto.
 
 ## Convenções de código
 
@@ -173,12 +175,13 @@ em `/app/api`, autenticação (Auth.js v5, credentials + JWT, login em
 dashboard em `/dashboard` (Recharts + heatmap, restrito ao DONO). Páginas
 protegidas por `proxy.ts`. Login de teste: `ana@sorveteria.com` (DONO) /
 `joao@sorveteria.com` (ATENDENTE), senha `123456` (gerada pelo
-`prisma/seed.ts` — nunca usar essa senha fora de dev local). Próximo passo:
-etapa 6, a avaliação (métricas de tempo/erros comparando com o caderno +
-questionário SUS) e a escrita da monografia — não é mais trabalho de
-código, é a parte experimental/redação do TCC. Mais pra frente, se ainda
-fizer sentido no cronograma, trocar o `DATABASE_URL` local por um Supabase
-real antes de ir pra produção. A **Introdução da monografia**
+`prisma/seed.ts` — nunca usar essa senha fora de dev local). A etapa 6
+(avaliação com métricas de tempo/erros + questionário SUS, e escrita da
+monografia) foi **adiada a pedido do usuário** para quando o sistema
+estiver finalizado — não faz sentido rodar o período experimental num
+sistema incompleto. Enquanto isso, o trabalho continua sendo evolução do
+próprio sistema (novas telas/funcionalidades, ajustes visuais, migração
+pro Supabase quando fizer sentido). A **Introdução da monografia**
 (contextualização, problema de pesquisa, justificativa, objetivos,
 metodologia e estrutura) já foi redigida nas atividades da disciplina.
 
