@@ -98,7 +98,14 @@ driver adapter do Prisma desde o início).
 
 Faturamento por dia/semana/mês, ticket médio, distribuição por forma de
 pagamento, horários e dias de maior movimento (heatmap), proporção
-reserva × balcão e produtos/sabores mais vendidos.
+reserva × balcão e produtos/sabores mais vendidos. Implementado em
+`GET /api/relatorios` (ver roadmap etapa 5).
+
+**Nota fuso horário:** `lib/relatorios.ts` assume a loja em
+America/Sao_Paulo com offset fixo UTC-3 (Brasil não tem mais horário de
+verão desde 2019, então isso é seguro sem biblioteca de fuso horário). Sem
+essa conversão, "dia"/"hora" no relatório sairiam errados sempre que o
+servidor rodar em UTC (caso comum em produção, ex. Vercel).
 
 ## Prioridade de UX
 
@@ -135,8 +142,17 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
    grid de produtos, carrinho, forma de pagamento, atalhos de teclado
    (1-9 produto, D/C/P pagamento, Enter finaliza, Esc limpa). Páginas
    protegidas por `proxy.ts` (redireciona pro `/login` sem sessão).
-5. **Dashboard e relatórios** ← *estamos aqui*
-6. Avaliação (métricas de tempo/erros + questionário SUS) e escrita da monografia
+5. ~~Dashboard e relatórios~~ ✅ concluído — `GET /api/relatorios?mes=AAAA-MM`
+   (padrão: mês atual) agrega faturamento total, ticket médio, distribuição
+   por forma de pagamento, faturamento por dia, produtos mais vendidos,
+   proporção reserva×balcão e heatmap dia-da-semana×hora. Tela em
+   `/dashboard` (Recharts + grade customizada pro heatmap), restrita ao
+   DONO (API e página — `proxy.ts` redireciona ATENDENTE pra `/`). Cálculo
+   feito em memória a partir das vendas do mês (`lib/relatorios.ts`), sem
+   groupBy/SQL bruto — simples de explicar, e o volume de uma sorveteria
+   pequena não justifica otimizar isso agora.
+6. **Avaliação (métricas de tempo/erros + questionário SUS) e escrita da
+   monografia** ← *estamos aqui*
 
 ## Convenções de código
 
@@ -147,18 +163,20 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 ## Status atual
 
-Etapas 1 a 4 do roadmap concluídas: CRUD completo de Venda, Produto e Reserva
+Etapas 1 a 5 do roadmap concluídas: CRUD completo de Venda, Produto e Reserva
 em `/app/api`, autenticação (Auth.js v5, credentials + JWT, login em
-`/login`) e a tela de registro de vendas em `/` (funcional, sem design —
-grid de produtos, carrinho, atalhos de teclado). Páginas protegidas por
-`proxy.ts`. Login de teste: `ana@sorveteria.com` (DONO) /
+`/login`), tela de registro de vendas em `/` (funcional, sem design) e
+dashboard em `/dashboard` (Recharts + heatmap, restrito ao DONO). Páginas
+protegidas por `proxy.ts`. Login de teste: `ana@sorveteria.com` (DONO) /
 `joao@sorveteria.com` (ATENDENTE), senha `123456` (gerada pelo
-`prisma/seed.ts` — nunca usar essa senha fora de dev local). Próximo passo
-técnico: dashboard e relatórios (etapa 5). Mais pra frente, trocar o
-`DATABASE_URL` local por um Supabase real antes de ir pra produção.
-A **Introdução da monografia** (contextualização, problema de pesquisa,
-justificativa, objetivos, metodologia e estrutura) já foi redigida nas
-atividades da disciplina.
+`prisma/seed.ts` — nunca usar essa senha fora de dev local). Próximo passo:
+etapa 6, a avaliação (métricas de tempo/erros comparando com o caderno +
+questionário SUS) e a escrita da monografia — não é mais trabalho de
+código, é a parte experimental/redação do TCC. Mais pra frente, se ainda
+fizer sentido no cronograma, trocar o `DATABASE_URL` local por um Supabase
+real antes de ir pra produção. A **Introdução da monografia**
+(contextualização, problema de pesquisa, justificativa, objetivos,
+metodologia e estrutura) já foi redigida nas atividades da disciplina.
 
 **Decisão de escopo (2026-08-05):** Reserva é só um agendamento (nome do
 cliente, data, status) — não tem valor nem pagamento, e não gera uma Venda
