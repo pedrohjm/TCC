@@ -150,7 +150,11 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
    DONO (API e página — `proxy.ts` redireciona ATENDENTE pra `/`). Cálculo
    feito em memória a partir das vendas do mês (`lib/relatorios.ts`), sem
    groupBy/SQL bruto — simples de explicar, e o volume de uma sorveteria
-   pequena não justifica otimizar isso agora.
+   pequena não justifica otimizar isso agora. Também tem uma seção "Vendas
+   do mês" (extrato: cada venda individual, agrupada por dia com o total do
+   dia) — o gráfico de faturamento por dia mostra só o agregado, então essa
+   lista é o detalhamento por trás dele. Usa `GET /api/vendas?mes=AAAA-MM`
+   (mesmo endpoint do CRUD de vendas, só ganhou esse filtro a mais).
 6. **Avaliação (métricas de tempo/erros + questionário SUS) e escrita da
    monografia** ← *estamos aqui*
 
