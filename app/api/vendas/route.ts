@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { criarVendaSchema } from '@/lib/validations/venda'
 import { exigirSessao } from '@/lib/auth-helpers'
+import { limitesDoMes } from '@/lib/relatorios'
 
 const incluirRelacoes = {
   itens: { include: { produto: true } },
@@ -15,8 +16,14 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url)
   const data = searchParams.get('data') // AAAA-MM-DD, filtra as vendas de um único dia
+  const mes = searchParams.get('mes') // AAAA-MM, filtra as vendas do mês inteiro
+
+  if (data && mes) {
+    return NextResponse.json({ erro: 'Use apenas um dos parâmetros: "data" ou "mes"' }, { status: 400 })
+  }
 
   let filtroData: { gte: Date; lt: Date } | undefined
+
   if (data) {
     const inicio = new Date(`${data}T00:00:00`)
     if (Number.isNaN(inicio.getTime())) {
@@ -27,6 +34,15 @@ export async function GET(request: NextRequest) {
     }
     const fim = new Date(inicio)
     fim.setDate(fim.getDate() + 1)
+    filtroData = { gte: inicio, lt: fim }
+  }
+
+  if (mes) {
+    const match = /^(\d{4})-(\d{2})$/.exec(mes)
+    if (!match) {
+      return NextResponse.json({ erro: 'Parâmetro "mes" deve estar no formato AAAA-MM' }, { status: 400 })
+    }
+    const { inicio, fim } = limitesDoMes(Number(match[1]), Number(match[2]) - 1)
     filtroData = { gte: inicio, lt: fim }
   }
 

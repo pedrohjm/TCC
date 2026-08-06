@@ -26,6 +26,14 @@ interface Relatorio {
   heatmap: { diaSemana: number; hora: number; quantidade: number }[]
 }
 
+interface VendaDoMes {
+  id: number
+  valorTotal: string
+  formaPagamento: string
+  dataHora: string
+  itens: { quantidade: number; produto: { nome: string } }[]
+}
+
 const CORES_PAGAMENTO: Record<string, string> = {
   DINHEIRO: '#16a34a',
   CARTAO: '#2563eb',
@@ -58,11 +66,41 @@ function somarMeses(mes: string, delta: number) {
   return `${data.getUTCFullYear()}-${String(data.getUTCMonth() + 1).padStart(2, '0')}`
 }
 
+// Mesma regra de fuso fixo (UTC-3) usada em lib/relatorios.ts, pra agrupar
+// as vendas no mesmo "dia da loja" que o gráfico de faturamento por dia.
+const OFFSET_FUSO_LOJA_MS = 3 * 60 * 60 * 1000
+
+function comoLocalDaLoja(dataIso: string): Date {
+  return new Date(new Date(dataIso).getTime() - OFFSET_FUSO_LOJA_MS)
+}
+
+function chaveDia(dataIso: string): string {
+  const local = comoLocalDaLoja(dataIso)
+  const ano = local.getUTCFullYear()
+  const mesN = String(local.getUTCMonth() + 1).padStart(2, '0')
+  const dia = String(local.getUTCDate()).padStart(2, '0')
+  return `${ano}-${mesN}-${dia}`
+}
+
+function horaLocal(dataIso: string): string {
+  const local = comoLocalDaLoja(dataIso)
+  return `${String(local.getUTCHours()).padStart(2, '0')}:${String(local.getUTCMinutes()).padStart(2, '0')}`
+}
+
+function formatarDataCurta(dia: string): string {
+  const [, mesN, diaN] = dia.split('-')
+  return `${diaN}/${mesN}`
+}
+
 export default function PainelDashboard() {
   const [mes, setMes] = useState(mesAtualString())
   const [relatorio, setRelatorio] = useState<Relatorio | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
+
+  const [vendasDoMes, setVendasDoMes] = useState<VendaDoMes[]>([])
+  const [carregandoVendas, setCarregandoVendas] = useState(true)
+  const [erroVendas, setErroVendas] = useState<string | null>(null)
 
   useEffect(() => {
     setCarregando(true)
@@ -76,6 +114,28 @@ export default function PainelDashboard() {
       .catch((e: Error) => setErro(e.message))
       .finally(() => setCarregando(false))
   }, [mes])
+
+  useEffect(() => {
+    setCarregandoVendas(true)
+    setErroVendas(null)
+    fetch(`/api/vendas?mes=${mes}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Não foi possível carregar as vendas do mês')
+        return res.json()
+      })
+      .then((dados: VendaDoMes[]) => setVendasDoMes(dados))
+      .catch((e: Error) => setErroVendas(e.message))
+      .finally(() => setCarregandoVendas(false))
+  }, [mes])
+
+  const vendasPorDia = new Map<string, VendaDoMes[]>()
+  for (const venda of vendasDoMes) {
+    const dia = chaveDia(venda.dataHora)
+    const lista = vendasPorDia.get(dia) ?? []
+    lista.push(venda)
+    vendasPorDia.set(dia, lista)
+  }
+  const diasComVendas = Array.from(vendasPorDia.keys()).sort().reverse()
 
   const heatmapMax = relatorio ? Math.max(1, ...relatorio.heatmap.map((h) => h.quantidade)) : 1
   const heatmapPorCelula = new Map(
@@ -157,6 +217,45 @@ export default function PainelDashboard() {
                 </ResponsiveContainer>
               </div>
             )}
+          </section>
+
+          <section>
+            <h2 className="mb-2 text-sm font-medium text-gray-600">
+              Vendas do mês <span className="font-normal text-gray-400">(agrupadas por dia)</span>
+            </h2>
+            {carregandoVendas && <p className="text-sm text-gray-500">Carregando…</p>}
+            {erroVendas && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{erroVendas}</p>}
+            {!carregandoVendas && diasComVendas.length === 0 && (
+              <p className="text-sm text-gray-400">Sem vendas neste mês.</p>
+            )}
+            <div className="flex flex-col gap-3">
+              {diasComVendas.map((dia) => {
+                const vendasDoDia = vendasPorDia.get(dia)!
+                const totalDoDia = vendasDoDia.reduce((soma, v) => soma + Number(v.valorTotal), 0)
+                return (
+                  <div key={dia} className="rounded border border-gray-200">
+                    <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-3 py-1.5">
+                      <span className="text-sm font-medium text-gray-700">{formatarDataCurta(dia)}</span>
+                      <span className="text-sm font-medium text-gray-700">{formatarMoeda(totalDoDia)}</span>
+                    </div>
+                    <ul className="divide-y divide-gray-100">
+                      {vendasDoDia.map((venda) => (
+                        <li key={venda.id} className="flex items-center justify-between px-3 py-1.5 text-sm">
+                          <span className="text-gray-600">
+                            {horaLocal(venda.dataHora)} —{' '}
+                            {venda.itens.map((item) => `${item.quantidade}x ${item.produto.nome}`).join(', ')}
+                          </span>
+                          <span className="flex items-center gap-2 whitespace-nowrap text-gray-900">
+                            <span className="text-xs text-gray-400">{venda.formaPagamento}</span>
+                            {formatarMoeda(Number(venda.valorTotal))}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )
+              })}
+            </div>
           </section>
 
           <section className="grid gap-6 sm:grid-cols-2">
