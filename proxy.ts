@@ -15,6 +15,12 @@ export default auth((req) => {
   if (!req.auth) {
     return Response.redirect(new URL('/login', req.nextUrl.origin))
   }
+
+  // Dashboard e relatórios são visão de dono do negócio — o atendente não
+  // precisa (nem deve) ver faturamento consolidado da loja.
+  if (req.nextUrl.pathname.startsWith('/dashboard') && req.auth.user.papel !== 'DONO') {
+    return Response.redirect(new URL('/', req.nextUrl.origin))
+  }
 })
 
 export const config = {

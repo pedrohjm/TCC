@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { auth, signOut } from "@/auth";
@@ -38,14 +39,26 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         {sessao?.user && (
           <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-2 text-sm">
-            <span className="text-gray-700">
-              {sessao.user.name} <span className="text-gray-400">({sessao.user.papel})</span>
+            <nav className="flex items-center gap-4">
+              <Link href="/" className="text-gray-700 hover:text-gray-900">
+                Registrar venda
+              </Link>
+              {sessao.user.papel === "DONO" && (
+                <Link href="/dashboard" className="text-gray-700 hover:text-gray-900">
+                  Dashboard
+                </Link>
+              )}
+            </nav>
+            <span className="flex items-center gap-3">
+              <span className="text-gray-700">
+                {sessao.user.name} <span className="text-gray-400">({sessao.user.papel})</span>
+              </span>
+              <form action={sair}>
+                <button type="submit" className="text-gray-500 underline hover:text-gray-900">
+                  Sair
+                </button>
+              </form>
             </span>
-            <form action={sair}>
-              <button type="submit" className="text-gray-500 underline hover:text-gray-900">
-                Sair
-              </button>
-            </form>
           </header>
         )}
         <div className="flex flex-1 flex-col">{children}</div>
