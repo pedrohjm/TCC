@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, ShoppingCart } from 'lucide-react'
+import { LayoutDashboard, Settings, ShoppingCart } from 'lucide-react'
 import {
   Sheet,
   SheetContent,
@@ -38,9 +38,12 @@ export function AppSidebar({ papel }: AppSidebarProps) {
   const { isMobile, openMobile, setOpenMobile } = useSidebar()
 
   const cabecalho = (
-    <div className="shrink-0 border-b border-border/70 bg-gradient-to-r from-primary/85 via-primary to-primary/85 px-4 py-2 text-primary-foreground">
-      <p className="text-sm font-semibold tracking-wide">Menu</p>
-      <p className="text-[0.65rem] text-primary-foreground/80">Q10 Sorvetes</p>
+    <div className="flex shrink-0 items-center gap-2 border-b border-border/70 bg-gradient-to-r from-primary/85 via-primary to-primary/85 px-4 py-2 text-primary-foreground">
+      <Settings className="h-4 w-4 shrink-0" />
+      <div>
+        <p className="text-sm font-semibold tracking-wide">Menu</p>
+        <p className="text-[0.65rem] text-primary-foreground/80">Q10 Sorvetes</p>
+      </div>
     </div>
   )
 

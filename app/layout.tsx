@@ -55,7 +55,10 @@ export default async function RootLayout({
           {/* Barra do topo — isolada, largura total, logo à esquerda e
               login/usuário à direita. */}
           <header className="shrink-0 border-b border-black/10 bg-sidebar/90 backdrop-blur-sm dark:border-white/10">
-            <div className="flex items-center justify-between gap-3 px-4 py-2">
+            {/* Mesmo max-w-[1080px] + px-4 do quadro central logo abaixo,
+                pra a logo alinhar com a borda esquerda do painel do menu
+                em vez de ficar colada na borda da janela do navegador. */}
+            <div className="mx-auto flex w-full max-w-[1080px] items-center justify-between gap-3 px-4 py-2">
               <div className="flex items-center gap-2">
                 <SidebarTrigger className="md:hidden" />
                 <Link
