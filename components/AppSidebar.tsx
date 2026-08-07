@@ -2,8 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, ShoppingCart, Store } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { LayoutDashboard, ShoppingCart } from 'lucide-react'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +20,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import { ITENS_CARDAPIO } from '@/lib/nav-cardapio'
 
@@ -22,28 +28,22 @@ interface AppSidebarProps {
   papel: 'DONO' | 'ATENDENTE' | null
 }
 
+// A logo/marca fica no topo da "janela" (app/layout.tsx), não aqui — este
+// componente é só o menu. Por isso não usamos o <Sidebar> padrão do shadcn
+// no desktop: ele é "position: fixed" preso na borda real do navegador, o
+// que quebraria a ideia de janela flutuante centralizada. Com
+// `collapsible="none"` ele vira uma div comum que ocupa a altura do pai —
+// exatamente o que cabe dentro da janela. No mobile, trocamos por um Sheet
+// (gaveta), controlado pelo mesmo estado do SidebarTrigger no header.
 export function AppSidebar({ papel }: AppSidebarProps) {
   const pathname = usePathname()
+  const { isMobile, openMobile, setOpenMobile } = useSidebar()
 
-  return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/" />}>
-              <Avatar className="rounded-lg after:rounded-lg">
-                <AvatarImage src="/images/logo/logo.png" alt="Logo da sorveteria" />
-                <AvatarFallback className="rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Store className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-semibold">Sorveteria</span>
-                <span className="text-xs text-muted-foreground">Cardápio &amp; sistema</span>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+  const conteudo = (
+    <>
+      <SidebarHeader className="px-3 py-3">
+        <span className="text-sm font-semibold text-sidebar-foreground">Menu</span>
+        <span className="text-xs text-sidebar-foreground/60">Q10 Sorvetes</span>
       </SidebarHeader>
 
       <SidebarContent>
@@ -56,11 +56,7 @@ export function AppSidebar({ papel }: AppSidebarProps) {
                 const Icone = item.icone
                 return (
                   <SidebarMenuItem key={item.slug}>
-                    <SidebarMenuButton
-                      render={<Link href={href} />}
-                      isActive={pathname === href}
-                      tooltip={item.titulo}
-                    >
+                    <SidebarMenuButton render={<Link href={href} />} isActive={pathname === href}>
                       <Icone />
                       <span>{item.titulo}</span>
                     </SidebarMenuButton>
@@ -77,11 +73,7 @@ export function AppSidebar({ papel }: AppSidebarProps) {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    render={<Link href="/vendas" />}
-                    isActive={pathname === '/vendas'}
-                    tooltip="Registrar venda"
-                  >
+                  <SidebarMenuButton render={<Link href="/vendas" />} isActive={pathname === '/vendas'}>
                     <ShoppingCart />
                     <span>Registrar venda</span>
                   </SidebarMenuButton>
@@ -97,11 +89,7 @@ export function AppSidebar({ papel }: AppSidebarProps) {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    render={<Link href="/dashboard" />}
-                    isActive={pathname === '/dashboard'}
-                    tooltip="Dashboard"
-                  >
+                  <SidebarMenuButton render={<Link href="/dashboard" />} isActive={pathname === '/dashboard'}>
                     <LayoutDashboard />
                     <span>Dashboard</span>
                   </SidebarMenuButton>
@@ -111,8 +99,29 @@ export function AppSidebar({ papel }: AppSidebarProps) {
           </SidebarGroup>
         )}
       </SidebarContent>
+    </>
+  )
 
-      <SidebarRail />
+  if (isMobile) {
+    return (
+      <Sheet open={openMobile} onOpenChange={setOpenMobile}>
+        <SheetContent
+          side="left"
+          className="w-(--sidebar-width) gap-0 bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+        >
+          <SheetHeader className="sr-only">
+            <SheetTitle>Menu</SheetTitle>
+            <SheetDescription>Menu de navegação</SheetDescription>
+          </SheetHeader>
+          {conteudo}
+        </SheetContent>
+      </Sheet>
+    )
+  }
+
+  return (
+    <Sidebar collapsible="none" className="hidden border-r md:flex">
+      {conteudo}
     </Sidebar>
   )
 }

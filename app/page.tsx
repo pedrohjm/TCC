@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <div className="flex flex-1 flex-col gap-8 p-6">
       <section className="overflow-hidden rounded-xl bg-gradient-to-br from-primary to-primary/80 p-8 text-primary-foreground">
-        <h1 className="text-3xl font-bold">Bem-vindo(a) à sorveteria</h1>
+        <h1 className="text-3xl font-bold">Bem-vindo(a) à Q10 Sorvetes</h1>
         <p className="mt-2 max-w-xl text-primary-foreground/90">
           Confira nosso cardápio: sabores de 1800 ml, self-service, picolés, acompanhamentos e
           bebidas.

@@ -177,12 +177,33 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
    exige mais login. `proxy.ts` ganhou uma lista de caminhos públicos (`/` e
    `/cardapio/*`); todo o resto continua exigindo sessão como antes.
    Pasta `public/images/` criada (`logo/`, `cardapio/`, `banners/`, com um
-   README explicando o que colocar em cada uma) — a logo em
-   `public/images/logo/logo.png` é usada no topo do menu via `Avatar` do
-   shadcn (cai num ícone de loja como fallback enquanto o arquivo não
-   existir). MCP server `shadcn` (`@jpisnice/shadcn-ui-mcp-server`)
-   registrado no Claude Code pra consultar componentes/demos do shadcn
-   durante o desenvolvimento do front.
+   README explicando o que colocar em cada uma). MCP server `shadcn`
+   (`@jpisnice/shadcn-ui-mcp-server`) registrado no Claude Code pra
+   consultar componentes/demos do shadcn durante o desenvolvimento do front.
+8. ~~Layout em "janela flutuante" sobre um fundo, a partir de um modelo em
+   PDF~~ ✅ concluído (2026-08-07) — o usuário mandou um PDF de referência
+   (`public/images/modelo/modelo.pdf`, um wiki de RPG) mostrando o app
+   inteiro (topo + menu + conteúdo) como uma janela arredondada e centralizada
+   flutuando sobre um fundo decorativo, em vez de ocupar a tela toda.
+   Reestruturado `app/layout.tsx`: `components/FundoPagina.tsx` é um fundo
+   fixo em tela cheia (`public/images/banners/fundo.jpg` — sem esse arquivo,
+   cai num gradiente); por cima, uma div central com `max-w-[1440px]`,
+   `rounded-2xl`, borda e sombra contém a janela (header + sidebar + conteúdo).
+   **Detalhe técnico importante:** o `<Sidebar>` do shadcn é `position: fixed`
+   preso na borda real do navegador — incompatível com ficar dentro de uma
+   janela flutuante. `components/AppSidebar.tsx` usa `collapsible="none"`
+   no desktop (vira uma div comum que respeita a altura do pai) e um `Sheet`
+   próprio no mobile (controlado pelo mesmo estado do `SidebarTrigger`,
+   `useSidebar()` ainda funciona normalmente). A logo (`public/images/logo/`)
+   revelou o nome real da loja, **Q10 Sorvetes** — atualizado no header, no
+   menu e na home (antes era só um "Sorveteria" genérico). Corrigido de
+   quebra um bug de fonte do `shadcn init` (`--font-sans: var(--font-sans)`
+   era uma referência circular em `app/globals.css`, fazendo o site cair pra
+   serifada padrão do navegador em vez da Geist Sans) e um aviso do Base UI
+   (`nativeButton`) ao usar `<Button render={<Link .../>}>` pro botão
+   "Entrar". Testado com screenshots reais via Playwright (`npx playwright
+   screenshot`) em desktop e mobile, e logado como DONO/ATENDENTE — não só
+   `tsc`/`build`, já que era uma mudança 100% visual.
 
 ## Convenções de código
 
@@ -193,11 +214,13 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 ## Status atual
 
-Etapas 1 a 5 e 7 do roadmap concluídas: CRUD completo de Venda, Produto e
+Etapas 1 a 5, 7 e 8 do roadmap concluídas: CRUD completo de Venda, Produto e
 Reserva em `/app/api`, autenticação (Auth.js v5, credentials + JWT, login em
 `/login`), dashboard em `/dashboard` (Recharts + heatmap, restrito ao DONO),
-e agora também o site com menu lateral (shadcn/ui): `/` é a home pública do
-cardápio, `/cardapio/<slug>` tem as 5 categorias (ainda só "em breve"),
+e o site com menu lateral (shadcn/ui) dentro de uma janela flutuante sobre
+um fundo, seguindo o modelo em PDF que o usuário mandou: `/` é a home
+pública do cardápio, `/cardapio/<slug>` tem as 5 categorias (ainda só "em
+breve"),
 `/vendas` tem a tela de registro de vendas (funcional, sem design refinado —
 só ganhou a sidebar/tema do shadcn ao redor). Páginas protegidas por
 `proxy.ts` (exceto `/` e `/cardapio/*`, que são públicas). Login de teste:
