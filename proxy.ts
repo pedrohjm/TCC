@@ -11,14 +11,30 @@ import { authConfig } from './auth.config'
 // login completo, só de saber se já existe uma sessão.
 const { auth } = NextAuth(authConfig)
 
+// "/" e "/cardapio/*" são a visão do cliente (cardápio) — pública, sem
+// login, pra poder ser aberta num tablet da loja ou no celular do cliente.
+const CAMINHOS_PUBLICOS = ['/', '/cardapio']
+
+function ehCaminhoPublico(pathname: string) {
+  return CAMINHOS_PUBLICOS.some(
+    (caminho) => pathname === caminho || pathname.startsWith(`${caminho}/`)
+  )
+}
+
 export default auth((req) => {
+  const { pathname } = req.nextUrl
+
+  if (ehCaminhoPublico(pathname)) {
+    return
+  }
+
   if (!req.auth) {
     return Response.redirect(new URL('/login', req.nextUrl.origin))
   }
 
   // Dashboard e relatórios são visão de dono do negócio — o atendente não
   // precisa (nem deve) ver faturamento consolidado da loja.
-  if (req.nextUrl.pathname.startsWith('/dashboard') && req.auth.user.papel !== 'DONO') {
+  if (pathname.startsWith('/dashboard') && req.auth.user.papel !== 'DONO') {
     return Response.redirect(new URL('/', req.nextUrl.origin))
   }
 })

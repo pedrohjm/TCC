@@ -30,7 +30,7 @@ domínio (Venda, Reserva...) e mensagens de commit em português.
 ## Stack definida
 
 - **Next.js** (App Router) + **TypeScript**
-- **Tailwind CSS**
+- **Tailwind CSS** + **shadcn/ui** (componentes) + **lucide-react** (ícones)
 - **Prisma** (ORM) — v7, com driver adapter (`@prisma/adapter-pg` + `pg`)
 - **PostgreSQL** (Neon ou Supabase; local via Docker é opcional)
 - Gráficos do dashboard: **Recharts** (alternativa: Chart.js)
@@ -159,6 +159,30 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
    monografia — **adiado a pedido do usuário (2026-08-06)**: só será feito
    quando o sistema estiver finalizado, não faz sentido rodar o período
    experimental num sistema ainda incompleto.
+7. ~~Site do cliente (cardápio) + navegação por papel com shadcn/ui~~ ✅
+   concluído (2026-08-07) — shadcn/ui inicializado (`components.json`, tema
+   próprio em `app/globals.css` repaginado pra sorveteria: morango como cor
+   primária, menta como accent, ao invés do neutro padrão). Menu lateral
+   (`components/AppSidebar.tsx`, bloco `sidebar` do shadcn) com navegação
+   agrupada por papel:
+   - **Cardápio** (todo mundo vê, sem login): Sabores 1800 ml, SelfService,
+     Picolés, Acompanhamentos, Bebidas — cada um em `/cardapio/<slug>`,
+     hoje só uma página "em breve" (`components/PaginaCardapioEmBreve.tsx`),
+     porque o modelo `Produto` ainda não distingue essas categorias. Lista
+     central em `lib/nav-cardapio.ts` (usada pelo menu e pelos cards da home).
+   - **Operação** (ATENDENTE e DONO): Registrar venda, agora em `/vendas`
+     (antes era a `/`).
+   - **Gestão** (só DONO): Dashboard.
+   `/` virou a home pública do cliente (cards linkando pro cardápio) — não
+   exige mais login. `proxy.ts` ganhou uma lista de caminhos públicos (`/` e
+   `/cardapio/*`); todo o resto continua exigindo sessão como antes.
+   Pasta `public/images/` criada (`logo/`, `cardapio/`, `banners/`, com um
+   README explicando o que colocar em cada uma) — a logo em
+   `public/images/logo/logo.png` é usada no topo do menu via `Avatar` do
+   shadcn (cai num ícone de loja como fallback enquanto o arquivo não
+   existir). MCP server `shadcn` (`@jpisnice/shadcn-ui-mcp-server`)
+   registrado no Claude Code pra consultar componentes/demos do shadcn
+   durante o desenvolvimento do front.
 
 ## Convenções de código
 
@@ -169,13 +193,17 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 ## Status atual
 
-Etapas 1 a 5 do roadmap concluídas: CRUD completo de Venda, Produto e Reserva
-em `/app/api`, autenticação (Auth.js v5, credentials + JWT, login em
-`/login`), tela de registro de vendas em `/` (funcional, sem design) e
-dashboard em `/dashboard` (Recharts + heatmap, restrito ao DONO). Páginas
-protegidas por `proxy.ts`. Login de teste: `ana@sorveteria.com` (DONO) /
-`joao@sorveteria.com` (ATENDENTE), senha `123456` (gerada pelo
-`prisma/seed.ts` — nunca usar essa senha fora de dev local). A etapa 6
+Etapas 1 a 5 e 7 do roadmap concluídas: CRUD completo de Venda, Produto e
+Reserva em `/app/api`, autenticação (Auth.js v5, credentials + JWT, login em
+`/login`), dashboard em `/dashboard` (Recharts + heatmap, restrito ao DONO),
+e agora também o site com menu lateral (shadcn/ui): `/` é a home pública do
+cardápio, `/cardapio/<slug>` tem as 5 categorias (ainda só "em breve"),
+`/vendas` tem a tela de registro de vendas (funcional, sem design refinado —
+só ganhou a sidebar/tema do shadcn ao redor). Páginas protegidas por
+`proxy.ts` (exceto `/` e `/cardapio/*`, que são públicas). Login de teste:
+`ana@sorveteria.com` (DONO) / `joao@sorveteria.com` (ATENDENTE), senha
+`123456` (gerada pelo `prisma/seed.ts` — nunca usar essa senha fora de dev
+local). A etapa 6
 (avaliação com métricas de tempo/erros + questionário SUS, e escrita da
 monografia) foi **adiada a pedido do usuário** para quando o sistema
 estiver finalizado — não faz sentido rodar o período experimental num
