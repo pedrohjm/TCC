@@ -5,10 +5,12 @@ import "./globals.css";
 import { auth, signOut } from "@/auth";
 import { AppSidebar } from "@/components/AppSidebar";
 import { FundoPagina } from "@/components/FundoPagina";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { TituloPagina } from "@/components/TituloPagina";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Store } from "lucide-react";
+import { UserCog } from "lucide-react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +42,11 @@ export default async function RootLayout({
   return (
     <html
       lang="pt-BR"
+      // suppressHydrationWarning: o next-themes injeta um script que aplica
+      // a classe "dark" no <html> antes do React hidratar (pra não piscar o
+      // tema errado); isso faz o atributo class do servidor e do client
+      // divergirem de propósito, e sem essa flag o React reclamaria disso.
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       {/* Layout copiado do modelo em public/images/modelo (taskbarhero.wiki):
@@ -49,69 +56,80 @@ export default async function RootLayout({
           252px, 16px de espaço entre os painéis) vieram de medir o site de
           referência. */}
       <body className="flex h-svh flex-col overflow-hidden">
-        <FundoPagina />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <FundoPagina />
 
-        <SidebarProvider className="contents">
-          {/* Barra do topo — isolada, largura total, logo à esquerda e
-              login/usuário à direita. */}
-          <header className="shrink-0 border-b border-black/10 bg-sidebar/90 backdrop-blur-sm dark:border-white/10">
-            {/* Mesmo max-w-[1080px] + px-4 do quadro central logo abaixo,
-                pra a logo alinhar com a borda esquerda do painel do menu
-                em vez de ficar colada na borda da janela do navegador. */}
-            <div className="mx-auto flex w-full max-w-[1080px] items-center justify-between gap-3 px-4 py-2">
-              <div className="flex items-center gap-2">
-                <SidebarTrigger className="md:hidden" />
-                <Link
-                  href="/"
-                  className="flex items-center gap-2 rounded-lg border border-primary/40 bg-background/70 px-2.5 py-1.5 shadow-sm transition-colors hover:border-primary/70"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/images/logo/Logo.png"
-                    alt=""
-                    className="h-7 w-7 rounded object-contain"
-                  />
-                  <span className="flex flex-col leading-tight">
-                    <span className="text-sm font-semibold">Q10 Sorvetes</span>
-                    <span className="text-[0.65rem] text-muted-foreground">
+          <SidebarProvider className="contents">
+            {/* Barra do topo — isolada, largura total, logo à esquerda e
+                login/usuário à direita. */}
+            <header className="shrink-0 border-b border-black/10 bg-sidebar/90 backdrop-blur-sm dark:border-white/10">
+              {/* Mesmo max-w-[1080px] + px-4 do quadro central logo abaixo,
+                  pra a logo alinhar com a borda esquerda do painel do menu
+                  em vez de ficar colada na borda da janela do navegador. */}
+              <div className="mx-auto flex w-full max-w-[1080px] items-center justify-between gap-3 px-4 py-2">
+                <div className="flex items-center gap-2">
+                  <SidebarTrigger className="md:hidden" />
+                  {/* Logo em formato de banner — a imagem já traz o nome da
+                      loja escrito nela, então mostramos ela grande e sem
+                      caixa/borda ao redor, em vez do bloco quadrado de antes. */}
+                  <Link href="/" className="flex items-center gap-2 py-1">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/images/logo/Logo.png"
+                      alt="Q10 Sorvetes"
+                      className="h-10 w-auto object-contain"
+                    />
+                    <span className="hidden text-xs text-muted-foreground sm:inline">
                       Cardápio &amp; sistema
                     </span>
-                  </span>
-                </Link>
-              </div>
-
-              {sessao?.user ? (
-                <div className="flex items-center gap-3 text-sm">
-                  <span className="hidden text-muted-foreground sm:inline">
-                    {sessao.user.name}{" "}
-                    <span className="text-muted-foreground/70">({sessao.user.papel})</span>
-                  </span>
-                  <form action={sair}>
-                    <Button type="submit" variant="outline" size="sm">
-                      Sair
-                    </Button>
-                  </form>
+                  </Link>
                 </div>
-              ) : (
-                <Button size="sm" nativeButton={false} render={<Link href="/login" />}>
-                  Entrar
-                </Button>
-              )}
-            </div>
-          </header>
 
-          {/* Quadro central: menu e conteúdo são dois painéis separados. */}
-          <div className="mx-auto flex w-full min-h-0 max-w-[1080px] flex-1 gap-4 p-4">
-            <AppSidebar papel={sessao?.user?.papel ?? null} />
-
-            <main className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/70 bg-background shadow-lg">
-              <div className="shrink-0 border-b border-border/70 bg-gradient-to-r from-primary/85 via-primary to-primary/85 px-4 py-2 text-center text-sm font-semibold tracking-wide text-primary-foreground">
-                <TituloPagina />
+                <div className="flex items-center gap-2">
+                  <ThemeToggle />
+                  {sessao?.user ? (
+                    <>
+                      <span className="hidden text-sm text-muted-foreground sm:inline">
+                        {sessao.user.name}{" "}
+                        <span className="text-muted-foreground/70">({sessao.user.papel})</span>
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        nativeButton={false}
+                        render={<Link href="/perfil" />}
+                        aria-label="Editar perfil"
+                      >
+                        <UserCog />
+                      </Button>
+                      <form action={sair}>
+                        <Button type="submit" variant="outline" size="sm">
+                          Sair
+                        </Button>
+                      </form>
+                    </>
+                  ) : (
+                    <Button size="sm" nativeButton={false} render={<Link href="/login" />}>
+                      Entrar
+                    </Button>
+                  )}
+                </div>
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
-            </main>
-          </div>
-        </SidebarProvider>
+            </header>
+
+            {/* Quadro central: menu e conteúdo são dois painéis separados. */}
+            <div className="mx-auto flex w-full min-h-0 max-w-[1080px] flex-1 gap-4 p-4">
+              <AppSidebar papel={sessao?.user?.papel ?? null} />
+
+              <main className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/70 bg-background shadow-lg">
+                <div className="shrink-0 border-b border-border/70 bg-gradient-to-r from-primary/85 via-primary to-primary/85 px-4 py-2 text-center text-sm font-semibold tracking-wide text-primary-foreground">
+                  <TituloPagina />
+                </div>
+                <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+              </main>
+            </div>
+          </SidebarProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

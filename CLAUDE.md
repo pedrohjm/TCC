@@ -31,6 +31,7 @@ domínio (Venda, Reserva...) e mensagens de commit em português.
 
 - **Next.js** (App Router) + **TypeScript**
 - **Tailwind CSS** + **shadcn/ui** (componentes) + **lucide-react** (ícones)
+  + **next-themes** (dark mode)
 - **Prisma** (ORM) — v7, com driver adapter (`@prisma/adapter-pg` + `pg`)
 - **PostgreSQL** (Neon ou Supabase; local via Docker é opcional)
 - Gráficos do dashboard: **Recharts** (alternativa: Chart.js)
@@ -229,6 +230,32 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
    os estáticos são públicos (200), `/vendas` e `/dashboard` seguem
    exigindo sessão (302), ATENDENTE continua barrado no `/dashboard` e a
    API sem sessão continua 401.
+10. ~~Logo em banner, dark mode e edição de perfil~~ ✅ concluído
+    (2026-08-07):
+    - **Logo em banner** — a caixa/bloco com borda ao redor da logo no header
+      virou só a imagem em tamanho maior (`h-10 w-auto`), já que a própria
+      logo (`public/images/logo/Logo.png`) traz o nome da loja escrito.
+    - **Dark mode de verdade** — instalado `next-themes` (`ThemeProvider` em
+      `components/ThemeProvider.tsx`, `attribute="class"`, resolve pelo
+      tema do sistema por padrão). Botão de alternar (`components/
+      ThemeToggle.tsx`, ícone sol/lua) no header. `<html suppressHydrationWarning>`
+      é necessário porque o script do next-themes aplica a classe `dark` antes
+      do React hidratar. O tema `.dark` já existia em `app/globals.css` desde
+      o `shadcn init`, só faltava algo pra alternar a classe — isso resolve
+      de vez o problema de "fundo escuro" que tinha sido adiado lá no início.
+    - **Editar perfil** — ícone (`UserCog`) ao lado do nome do usuário no
+      header, linkando pra `/perfil` (protegida pelo `proxy.ts`, igual
+      `/vendas`/`/dashboard`). Página com formulário funcional pra trocar
+      nome e senha (`prisma.usuario`, e-mail não é editável por aqui pra não
+      complicar a identidade do login). Server action em `app/perfil/page.tsx`
+      (mesmo padrão do `app/login/page.tsx`: função `'use server'` dentro do
+      arquivo da página, sem precisar de rota de API). Senha só troca se a
+      senha atual bater (`bcrypt.compare`) — validado com Zod em
+      `lib/validations/perfil.ts`. **Limitação conhecida:** como a sessão é
+      JWT (stateless), trocar o nome não atualiza o que aparece no header até
+      sair e entrar de novo — o token guarda o nome desde o login. Testado
+      via Playwright de ponta a ponta (senha errada mostra erro, nome muda
+      com sucesso, reversão), não só os campos isolados.
 
 ## Convenções de código
 
@@ -239,17 +266,19 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 ## Status atual
 
-Etapas 1 a 5 e 7 a 9 do roadmap concluídas: CRUD completo de Venda, Produto
+Etapas 1 a 5 e 7 a 10 do roadmap concluídas: CRUD completo de Venda, Produto
 e Reserva em `/app/api`, autenticação (Auth.js v5, credentials + JWT, login
 em `/login`), dashboard em `/dashboard` (Recharts + heatmap, restrito ao
 DONO), e o site (shadcn/ui) no layout do modelo de referência — topo isolado
-com a logo, e abaixo dois painéis separados (menu + conteúdo) num quadro
-estreito e centralizado, com o fundo aparecendo em volta: `/` é a home
-pública do cardápio, `/cardapio/<slug>` tem as 5 categorias (ainda só "em
-breve"),
+com a logo em banner, e abaixo dois painéis separados (menu + conteúdo) num
+quadro estreito e centralizado, com o fundo aparecendo em volta, dark mode
+de verdade (botão sol/lua) e página de editar perfil (`/perfil`, trocar
+nome/senha): `/` é a home pública do cardápio, `/cardapio/<slug>` tem as 5
+categorias (ainda só "em breve"),
 `/vendas` tem a tela de registro de vendas (funcional, sem design refinado —
 só ganhou a sidebar/tema do shadcn ao redor). Páginas protegidas por
-`proxy.ts` (exceto `/` e `/cardapio/*`, que são públicas). Login de teste:
+`proxy.ts` (exceto `/`, `/cardapio/*` e os arquivos estáticos de `/public`,
+que são públicos). Login de teste:
 `ana@sorveteria.com` (DONO) / `joao@sorveteria.com` (ATENDENTE), senha
 `123456` (gerada pelo `prisma/seed.ts` — nunca usar essa senha fora de dev
 local). A etapa 6
