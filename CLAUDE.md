@@ -204,6 +204,31 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
    "Entrar". Testado com screenshots reais via Playwright (`npx playwright
    screenshot`) em desktop e mobile, e logado como DONO/ATENDENTE — não só
    `tsc`/`build`, já que era uma mudança 100% visual.
+9. ~~Layout fiel ao modelo: topo isolado + painéis separados~~ ✅ concluído
+   (2026-08-07) — a primeira versão da janela ainda não estava parecida com
+   o modelo, então medi o site de referência ao vivo com Playwright
+   (`getBoundingClientRect` nos blocos principais) em vez de chutar. Números
+   que vieram de lá e foram replicados: quadro central de **1056px**
+   (usamos `max-w-[1080px]` — a versão anterior tinha 1440px, "muito grande
+   na horizontal"), menu de **252px**, **16px** de espaço entre menu e
+   conteúdo. Estrutura final: barra do topo isolada ocupando a largura toda
+   (logo + login/usuário), e abaixo dela **dois painéis separados** (menu e
+   conteúdo), cada um com borda, sombra e sua própria faixa de cabeçalho
+   colorida — o fundo aparece nas laterais e no vão entre eles.
+   `components/TituloPagina.tsx` põe o nome da página na faixa do painel de
+   conteúdo (derivado da rota, pra não ter que passar o título por todas as
+   páginas), e os `<h1>` que as telas de venda/dashboard/login tinham foram
+   removidos porque viraram duplicata dessa faixa. Login repaginado com os
+   tokens do tema (antes tinha `bg-gray-900`/`border-gray-300` fixos) e sem
+   `min-h-screen`, que brigava com o painel.
+   **Bug corrigido no caminho:** o `matcher` do `proxy.ts` (`'/((?!api|login|_next).*)'`)
+   pegava também os arquivos estáticos de `/public`, respondendo 302 pro
+   `/login` — a logo só carregava pra quem já estivesse logado. Agora o
+   matcher também ignora qualquer caminho com extensão de arquivo
+   (`.*\.`). Depois da mudança, testado por curl que `/`, `/cardapio/*` e
+   os estáticos são públicos (200), `/vendas` e `/dashboard` seguem
+   exigindo sessão (302), ATENDENTE continua barrado no `/dashboard` e a
+   API sem sessão continua 401.
 
 ## Convenções de código
 
@@ -214,11 +239,12 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 ## Status atual
 
-Etapas 1 a 5, 7 e 8 do roadmap concluídas: CRUD completo de Venda, Produto e
-Reserva em `/app/api`, autenticação (Auth.js v5, credentials + JWT, login em
-`/login`), dashboard em `/dashboard` (Recharts + heatmap, restrito ao DONO),
-e o site com menu lateral (shadcn/ui) dentro de uma janela flutuante sobre
-um fundo, seguindo o modelo em PDF que o usuário mandou: `/` é a home
+Etapas 1 a 5 e 7 a 9 do roadmap concluídas: CRUD completo de Venda, Produto
+e Reserva em `/app/api`, autenticação (Auth.js v5, credentials + JWT, login
+em `/login`), dashboard em `/dashboard` (Recharts + heatmap, restrito ao
+DONO), e o site (shadcn/ui) no layout do modelo de referência — topo isolado
+com a logo, e abaixo dois painéis separados (menu + conteúdo) num quadro
+estreito e centralizado, com o fundo aparecendo em volta: `/` é a home
 pública do cardápio, `/cardapio/<slug>` tem as 5 categorias (ainda só "em
 breve"),
 `/vendas` tem a tela de registro de vendas (funcional, sem design refinado —

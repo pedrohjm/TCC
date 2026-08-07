@@ -150,8 +150,9 @@ export default function PainelDashboard() {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 p-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+      {/* O título "Dashboard" já vem da faixa no topo do painel
+          (components/TituloPagina.tsx), então aqui ficam só os controles. */}
+      <div className="flex items-center justify-end">
         <div className="flex items-center gap-2">
           <button
             type="button"

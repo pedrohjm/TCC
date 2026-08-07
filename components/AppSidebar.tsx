@@ -16,7 +16,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -28,78 +27,80 @@ interface AppSidebarProps {
   papel: 'DONO' | 'ATENDENTE' | null
 }
 
-// A logo/marca fica no topo da "janela" (app/layout.tsx), não aqui — este
-// componente é só o menu. Por isso não usamos o <Sidebar> padrão do shadcn
-// no desktop: ele é "position: fixed" preso na borda real do navegador, o
-// que quebraria a ideia de janela flutuante centralizada. Com
-// `collapsible="none"` ele vira uma div comum que ocupa a altura do pai —
-// exatamente o que cabe dentro da janela. No mobile, trocamos por um Sheet
-// (gaveta), controlado pelo mesmo estado do SidebarTrigger no header.
+// A logo e o login ficam na barra do topo (app/layout.tsx), não aqui —
+// este componente é só o painel do menu. No desktop usamos
+// `collapsible="none"`: o <Sidebar> padrão do shadcn é "position: fixed"
+// preso na borda do navegador, o que impediria ele de ser um painel
+// separado dentro do quadro central. No mobile vira uma gaveta (Sheet),
+// controlada pelo mesmo estado do SidebarTrigger que fica no topo.
 export function AppSidebar({ papel }: AppSidebarProps) {
   const pathname = usePathname()
   const { isMobile, openMobile, setOpenMobile } = useSidebar()
 
-  const conteudo = (
-    <>
-      <SidebarHeader className="px-3 py-3">
-        <span className="text-sm font-semibold text-sidebar-foreground">Menu</span>
-        <span className="text-xs text-sidebar-foreground/60">Q10 Sorvetes</span>
-      </SidebarHeader>
+  const cabecalho = (
+    <div className="shrink-0 border-b border-border/70 bg-gradient-to-r from-primary/85 via-primary to-primary/85 px-4 py-2 text-primary-foreground">
+      <p className="text-sm font-semibold tracking-wide">Menu</p>
+      <p className="text-[0.65rem] text-primary-foreground/80">Q10 Sorvetes</p>
+    </div>
+  )
 
-      <SidebarContent>
+  const navegacao = (
+    <SidebarContent>
+      <SidebarGroup>
+        <SidebarGroupLabel>Cardápio</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {ITENS_CARDAPIO.map((item) => {
+              const href = `/cardapio/${item.slug}`
+              const Icone = item.icone
+              return (
+                <SidebarMenuItem key={item.slug}>
+                  <SidebarMenuButton render={<Link href={href} />} isActive={pathname === href}>
+                    <Icone />
+                    <span>{item.titulo}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            })}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      {papel && (
         <SidebarGroup>
-          <SidebarGroupLabel>Cardápio</SidebarGroupLabel>
+          <SidebarGroupLabel>Operação</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {ITENS_CARDAPIO.map((item) => {
-                const href = `/cardapio/${item.slug}`
-                const Icone = item.icone
-                return (
-                  <SidebarMenuItem key={item.slug}>
-                    <SidebarMenuButton render={<Link href={href} />} isActive={pathname === href}>
-                      <Icone />
-                      <span>{item.titulo}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
+              <SidebarMenuItem>
+                <SidebarMenuButton render={<Link href="/vendas" />} isActive={pathname === '/vendas'}>
+                  <ShoppingCart />
+                  <span>Registrar venda</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+      )}
 
-        {papel && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Operação</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton render={<Link href="/vendas" />} isActive={pathname === '/vendas'}>
-                    <ShoppingCart />
-                    <span>Registrar venda</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {papel === 'DONO' && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Gestão</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton render={<Link href="/dashboard" />} isActive={pathname === '/dashboard'}>
-                    <LayoutDashboard />
-                    <span>Dashboard</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-      </SidebarContent>
-    </>
+      {papel === 'DONO' && (
+        <SidebarGroup>
+          <SidebarGroupLabel>Gestão</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  render={<Link href="/dashboard" />}
+                  isActive={pathname === '/dashboard'}
+                >
+                  <LayoutDashboard />
+                  <span>Dashboard</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      )}
+    </SidebarContent>
   )
 
   if (isMobile) {
@@ -113,15 +114,20 @@ export function AppSidebar({ papel }: AppSidebarProps) {
             <SheetTitle>Menu</SheetTitle>
             <SheetDescription>Menu de navegação</SheetDescription>
           </SheetHeader>
-          {conteudo}
+          {cabecalho}
+          {navegacao}
         </SheetContent>
       </Sheet>
     )
   }
 
   return (
-    <Sidebar collapsible="none" className="hidden border-r md:flex">
-      {conteudo}
+    <Sidebar
+      collapsible="none"
+      className="hidden w-[252px] shrink-0 overflow-hidden rounded-xl border border-border/70 shadow-lg md:flex"
+    >
+      {cabecalho}
+      {navegacao}
     </Sidebar>
   )
 }

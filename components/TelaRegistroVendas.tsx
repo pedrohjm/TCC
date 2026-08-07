@@ -159,10 +159,10 @@ export default function TelaRegistroVendas() {
     return () => window.removeEventListener('keydown', aoTeclar)
   }, [produtos, adicionarAoCarrinho, finalizarVenda, limparCarrinho])
 
+  // O título "Registrar venda" já vem da faixa no topo do painel
+  // (components/TituloPagina.tsx).
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 p-4">
-      <h1 className="text-xl font-semibold text-gray-900">Registrar venda</h1>
-
       <section>
         <h2 className="mb-2 text-sm font-medium text-gray-600">
           Produtos <span className="font-normal text-gray-400">(clique ou tecle o número)</span>

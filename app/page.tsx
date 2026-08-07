@@ -18,7 +18,9 @@ export default function Home() {
         </p>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* 2 colunas no máximo: o painel de conteúdo agora é estreito
+          (~790px), então 3 colunas ficariam apertadas. */}
+      <section className="grid gap-4 sm:grid-cols-2">
         {ITENS_CARDAPIO.map((item) => {
           const Icone = item.icone
           return (
