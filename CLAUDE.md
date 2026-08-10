@@ -256,6 +256,35 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       sair e entrar de novo — o token guarda o nome desde o login. Testado
       via Playwright de ponta a ponta (senha errada mostra erro, nome muda
       com sucesso, reversão), não só os campos isolados.
+11. ~~Tela de Sabores 1800ml (primeira categoria de cardápio implementada de
+    verdade)~~ ✅ concluído (2026-08-10) — baseado em dois modelos em PDF
+    (`public/images/modelo/Search.pdf` e `Sabores.pdf`). Novo model
+    `Sabor` no `schema.prisma` (migration `20260810173426_adiciona_sabor`):
+    nome, categoria (`enum CategoriaSabor`: DOCE | FRUTA | AZEDO — dá pra
+    crescer depois), descrição, foto (opcional) e ativo. **Importante:**
+    `Sabor` é separado de `Produto` de propósito — `Produto` é o que entra
+    no carrinho da venda (Casquinha, Sundae...), `Sabor` é só "que gosto tem
+    hoje no pote de 1800ml", sem preço nem venda associada. 9 sabores de
+    exemplo no `prisma/seed.ts` (3 por categoria). `GET /api/sabores`
+    (`?categoria=DOCE|FRUTA|AZEDO` opcional) é uma rota **pública** — não
+    chama `exigirSessao()`, porque a tela em `/cardapio/sabores-1800ml` é
+    acessível sem login como o resto do cardápio.
+    Tela dividida em dois painéis (dois "quadrados" separados, como pedido):
+    `components/FiltroCategoriaSabor.tsx` (chips Todos/Doce/Fruta/Azedo,
+    cada categoria com cor e ícone próprios — mesma ideia do filtro por
+    raridade do `Search.pdf`) e `components/GradeSabores.tsx` (contador +
+    grade de cards com foto/categoria/descrição, como o `Sabores.pdf`).
+    `components/TelaSabores.tsx` junta os dois e busca a lista via fetch
+    toda vez que a categoria selecionada muda. Fotos ainda não existem
+    (`public/images/cardapio/<slug>.jpg` no seed é só o caminho reservado)
+    — cai num ícone da categoria como fallback, mesmo padrão da logo.
+    **Detalhe de ambiente:** `lib/prisma.ts` guarda o `PrismaClient` num
+    singleton em `globalThis` de propósito, pra sobreviver ao hot-reload do
+    Next sem esgotar conexão — isso também significa que, depois de rodar
+    `prisma generate` (schema novo), o servidor de **dev precisa ser
+    reiniciado** pra pegar o client atualizado; só recarregar a página não
+    basta (foi exatamente isso que causou um 500 durante o desenvolvimento
+    dessa etapa).
 
 ## Convenções de código
 
@@ -266,7 +295,7 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 ## Status atual
 
-Etapas 1 a 5 e 7 a 10 do roadmap concluídas: CRUD completo de Venda, Produto
+Etapas 1 a 5 e 7 a 11 do roadmap concluídas: CRUD completo de Venda, Produto
 e Reserva em `/app/api`, autenticação (Auth.js v5, credentials + JWT, login
 em `/login`), dashboard em `/dashboard` (Recharts + heatmap, restrito ao
 DONO), e o site (shadcn/ui) no layout do modelo de referência — topo isolado
@@ -274,7 +303,10 @@ com a logo em banner, e abaixo dois painéis separados (menu + conteúdo) num
 quadro estreito e centralizado, com o fundo aparecendo em volta, dark mode
 de verdade (botão sol/lua) e página de editar perfil (`/perfil`, trocar
 nome/senha): `/` é a home pública do cardápio, `/cardapio/<slug>` tem as 5
-categorias (ainda só "em breve"),
+categorias — **Sabores 1800ml já implementada de verdade** (filtro por
+categoria + grade de cards, model `Sabor` novo no banco, `GET /api/sabores`
+público), as outras 4 (SelfService, Picolés, Acompanhamentos, Bebidas)
+ainda "em breve",
 `/vendas` tem a tela de registro de vendas (funcional, sem design refinado —
 só ganhou a sidebar/tema do shadcn ao redor). Páginas protegidas por
 `proxy.ts` (exceto `/`, `/cardapio/*` e os arquivos estáticos de `/public`,

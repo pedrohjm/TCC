@@ -11,9 +11,14 @@ em `/images/logo/logo.png`).
   Windows não faz diferença, mas em produção (Linux) faz.
 - `banners/fundo.jpg` — imagem de fundo atrás da "janela" do app
   (`components/FundoPagina.tsx`). Sem esse arquivo, cai num gradiente.
-- `cardapio/` — fotos dos sabores/produtos, pra usar quando as telas de
-  Sabores 1800ml, SelfService, Picolés, Acompanhamentos e Bebidas forem
-  implementadas de verdade.
+- `cardapio/` — fotos dos sabores/produtos. A tela de Sabores 1800ml já usa
+  isso de verdade: os nomes esperados (definidos em `prisma/seed.ts`) são
+  `chocolate-belga.jpg`, `ninho-nutella.jpg`, `brigadeiro.jpg`, `morango.jpg`,
+  `manga.jpg`, `maracuja.jpg`, `limao-siciliano.jpg`, `tangerina.jpg` e
+  `framboesa.jpg`. Sem o arquivo, o card cai num ícone da categoria (Doce/
+  Fruta/Azedo) em vez de quebrar. As outras categorias (SelfService,
+  Picolés, Acompanhamentos, Bebidas) ainda são só "em breve", sem uso de
+  imagem ainda.
 - `banners/` — imagens maiores (ex. banner da home), se um dia a home
   precisar de uma foto em vez do fundo colorido atual.
 

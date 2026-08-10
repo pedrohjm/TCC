@@ -27,6 +27,12 @@ enum StatusReserva {
   CANCELADA
 }
 
+enum CategoriaSabor {
+  DOCE
+  FRUTA
+  AZEDO
+}
+
 model Usuario {
   id        Int      @id @default(autoincrement())
   nome      String
@@ -80,6 +86,21 @@ model Reserva {
   vendas      Venda[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+}
+
+// Sabores disponíveis nos potes de 1800 ml — puramente informativo pro
+// cliente ver o que tem em estoque. É um catálogo separado do Produto:
+// Produto é o que entra no carrinho da venda (Casquinha, Sundae...),
+// Sabor é só "qual gosto de sorvete tem hoje", sem preço nem venda direta.
+model Sabor {
+  id        Int            @id @default(autoincrement())
+  nome      String
+  categoria CategoriaSabor
+  descricao String
+  foto      String?
+  ativo     Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 }
 
 model FechamentoCaixa {
