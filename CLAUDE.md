@@ -285,6 +285,16 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
     reiniciado** pra pegar o client atualizado; só recarregar a página não
     basta (foi exatamente isso que causou um 500 durante o desenvolvimento
     dessa etapa).
+12. ~~Cartão de sabor minimalista + preview ao passar o mouse~~ ✅ concluído
+    (2026-08-10), a partir de `public/images/modelo/Mouse_Sabores.pdf` — o
+    cartão em `components/GradeSabores.tsx` agora mostra só a tag e o nome;
+    foto e descrição só aparecem numa janela flutuante ao passar o mouse
+    (`HoverCard` do shadcn, componente `hover-card` — usa `@base-ui/react/
+    preview-card` por baixo). Ordem da janela, como pedido: tag+nome no
+    topo, foto no meio, descrição embaixo. **Limitação conhecida:** é uma
+    interação de hover, então não existe em telas touch (celular/tablet sem
+    mouse) — aceitável por enquanto porque essa tela normalmente é vista no
+    balcão/totem, mas vale lembrar se um dia virar prioridade mobile.
 
 ## Convenções de código
 

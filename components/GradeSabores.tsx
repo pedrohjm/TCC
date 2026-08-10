@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { CATEGORIAS_SABOR, type CategoriaSaborValor } from '@/lib/categorias-sabor'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
+import { CATEGORIAS_SABOR, type CategoriaSaborValor, type InfoCategoriaSabor } from '@/lib/categorias-sabor'
 
 export interface Sabor {
   id: number
@@ -36,26 +37,49 @@ function FotoSabor({ src, alt, icone: Icone }: { src: string | null; alt: string
           onError={() => setFalhou(true)}
         />
       )}
-      {falhou && <Icone className="h-8 w-8 text-muted-foreground/40" />}
+      {falhou && <Icone className="h-10 w-10 text-muted-foreground/40" />}
     </div>
   )
 }
 
+function TagCategoria({ info }: { info: InfoCategoriaSabor }) {
+  return (
+    <span className={`text-[0.65rem] font-semibold tracking-wide uppercase ${info.corTexto}`}>
+      {info.rotulo}
+    </span>
+  )
+}
+
+// Cartão só com nome + tag — o resto (foto e descrição) fica escondido até
+// passar o mouse, na janela flutuante no estilo do modelo em
+// public/images/modelo/Mouse_Sabores.pdf: tag+nome no topo, foto no meio,
+// descrição embaixo.
 function CartaoSabor({ sabor }: { sabor: Sabor }) {
   const info = CATEGORIAS_SABOR.find((categoria) => categoria.valor === sabor.categoria)!
-  const Icone = info.icone
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border">
-      <FotoSabor src={sabor.foto} alt={sabor.nome} icone={Icone} />
-      <div className="space-y-1 p-3">
-        <span className={`text-[0.65rem] font-semibold tracking-wide uppercase ${info.corTexto}`}>
-          {info.rotulo}
-        </span>
+    <HoverCard>
+      <HoverCardTrigger
+        render={<div />}
+        delay={150}
+        closeDelay={100}
+        className="cursor-default space-y-1 rounded-lg border border-border p-3 transition-colors hover:border-primary/50"
+      >
+        <TagCategoria info={info} />
         <p className="text-sm leading-tight font-semibold">{sabor.nome}</p>
-        <p className="line-clamp-2 text-xs text-muted-foreground">{sabor.descricao}</p>
-      </div>
-    </div>
+      </HoverCardTrigger>
+
+      <HoverCardContent className="w-64 overflow-hidden rounded-lg p-0" sideOffset={8}>
+        <div className="space-y-0.5 border-b border-border bg-muted/40 px-3 py-2">
+          <TagCategoria info={info} />
+          <p className="text-sm font-semibold">{sabor.nome}</p>
+        </div>
+        <FotoSabor src={sabor.foto} alt={sabor.nome} icone={info.icone} />
+        <div className="p-3">
+          <p className="text-xs text-muted-foreground">{sabor.descricao}</p>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
   )
 }
 
@@ -64,8 +88,7 @@ function pluralizar(quantidade: number) {
 }
 
 // "Quadrado" 2 da tela de sabores — grade de cartões no estilo do modelo
-// em public/images/modelo/Sabores.pdf (contador no topo + grade de cards
-// com imagem, categoria e descrição curta).
+// em public/images/modelo/Sabores.pdf (contador no topo + grade de cards).
 export function GradeSabores({ sabores, carregando, erro }: GradeSaboresProps) {
   return (
     <Card>
