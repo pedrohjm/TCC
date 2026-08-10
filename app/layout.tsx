@@ -8,7 +8,7 @@ import { FundoPagina } from "@/components/FundoPagina";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TituloPagina } from "@/components/TituloPagina";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { UserCog } from "lucide-react";
 
@@ -68,7 +68,6 @@ export default async function RootLayout({
                   em vez de ficar colada na borda da janela do navegador. */}
               <div className="mx-auto flex w-full max-w-[1080px] items-center justify-between gap-3 px-4 py-2">
                 <div className="flex items-center gap-2">
-                  <SidebarTrigger className="md:hidden" />
                   {/* Logo em formato de banner — a imagem já traz o nome da
                       loja escrito nela, então mostramos ela grande e sem
                       caixa/borda ao redor, em vez do bloco quadrado de antes. */}
@@ -125,7 +124,9 @@ export default async function RootLayout({
                 <div className="shrink-0 border-b border-border/70 bg-gradient-to-r from-primary/85 via-primary to-primary/85 px-4 py-2 text-center text-sm font-semibold tracking-wide text-primary-foreground">
                   <TituloPagina />
                 </div>
-                <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+                {/* pb-24 no mobile: espaço pro menu flutuante (AppSidebar,
+                    fixed bottom-4) não cobrir o final do conteúdo. */}
+                <div className="min-h-0 flex-1 overflow-y-auto pb-24 md:pb-0">{children}</div>
               </main>
             </div>
           </SidebarProvider>

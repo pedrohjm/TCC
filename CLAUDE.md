@@ -306,6 +306,27 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
     não existe em telas touch (celular/tablet sem mouse) — aceitável por
     enquanto porque essa tela normalmente é vista no balcão/totem, mas vale
     lembrar se um dia virar prioridade mobile.
+13. ~~Navegação mobile: menu flutuante com gradiente em vez de gaveta~~ ✅
+    concluído (2026-08-10) — trocado o botão de hambúrguer (canto superior
+    esquerdo, abria uma gaveta lateral) por uma barra flutuante fixa embaixo
+    da tela, baseada num componente de terceiros ("Gradient Menu": bolinhas
+    com ícone que viram pílulas com gradiente ao tocar/passar o mouse).
+    Duas adaptações em relação ao componente original: usa **lucide-react**
+    em vez de `react-icons` (já é a biblioteca de ícones do projeto inteiro,
+    não fazia sentido adicionar uma segunda só pra isso) e os itens vêm por
+    prop (`GradientMenuItem[]`) com navegação real via `next/link`, em vez
+    de uma lista fixa decorativa. Primitivo reutilizável em
+    `components/ui/gradient-menu.tsx`; `components/AppSidebar.tsx` monta a
+    lista real (5 categorias do cardápio + Registrar venda se logado +
+    Dashboard se DONO) com um gradiente de cor diferente por item e destaca
+    o item da página atual (`ring-2 ring-primary`). Como remove a gaveta,
+    também não precisa mais do botão de trigger no header
+    (`app/layout.tsx`) nem do `Sheet` — `AppSidebar` decide entre o painel
+    lateral (desktop) e essa barra (`isMobile`, do `useSidebar()`) sem
+    precisar de estado de aberto/fechado. Com mais itens do que cabem na
+    tela (DONO vê 7), a barra rola horizontalmente (`overflow-x-auto`) —
+    testado que dá pra rolar até o último item e clicar nele. `SidebarInset`
+    ganhou `pb-24` no mobile pra o conteúdo não ficar embaixo da barra.
 
 ## Convenções de código
 
