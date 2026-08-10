@@ -50,10 +50,10 @@ function TagCategoria({ info }: { info: InfoCategoriaSabor }) {
   )
 }
 
-// Cartão só com nome + tag — o resto (foto e descrição) fica escondido até
-// passar o mouse, na janela flutuante no estilo do modelo em
-// public/images/modelo/Mouse_Sabores.pdf: tag+nome no topo, foto no meio,
-// descrição embaixo.
+// Cartão com foto + tag + nome. Passando o mouse, abre uma janela pro lado
+// (nunca pra cima/baixo — ver collisionAvoidance em components/ui/hover-card.tsx)
+// no estilo do modelo em public/images/modelo/Mouse_Sabores.pdf: tag+nome
+// no topo, foto no meio, descrição embaixo.
 function CartaoSabor({ sabor }: { sabor: Sabor }) {
   const info = CATEGORIAS_SABOR.find((categoria) => categoria.valor === sabor.categoria)!
 
@@ -63,13 +63,16 @@ function CartaoSabor({ sabor }: { sabor: Sabor }) {
         render={<div />}
         delay={150}
         closeDelay={100}
-        className="cursor-default space-y-1 rounded-lg border border-border p-3 transition-colors hover:border-primary/50"
+        className="cursor-default overflow-hidden rounded-lg border border-border transition-colors hover:border-primary/50"
       >
-        <TagCategoria info={info} />
-        <p className="text-sm leading-tight font-semibold">{sabor.nome}</p>
+        <FotoSabor src={sabor.foto} alt={sabor.nome} icone={info.icone} />
+        <div className="space-y-1 p-3">
+          <TagCategoria info={info} />
+          <p className="text-sm leading-tight font-semibold">{sabor.nome}</p>
+        </div>
       </HoverCardTrigger>
 
-      <HoverCardContent className="w-64 overflow-hidden rounded-lg p-0" sideOffset={8}>
+      <HoverCardContent className="w-64 overflow-hidden rounded-lg p-0">
         <div className="space-y-0.5 border-b border-border bg-muted/40 px-3 py-2">
           <TagCategoria info={info} />
           <p className="text-sm font-semibold">{sabor.nome}</p>

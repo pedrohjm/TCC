@@ -16,7 +16,7 @@ function HoverCardTrigger({ ...props }: PreviewCardPrimitive.Trigger.Props) {
 
 function HoverCardContent({
   className,
-  side = "bottom",
+  side = "right",
   sideOffset = 4,
   align = "center",
   alignOffset = 4,
@@ -33,6 +33,9 @@ function HoverCardContent({
         alignOffset={alignOffset}
         side={side}
         sideOffset={sideOffset}
+        // side "flip" só entre left/right (nunca cai pra top/bottom) —
+        // pedido explícito: o preview deve abrir só pra lateral.
+        collisionAvoidance={{ side: "flip", fallbackAxisSide: "none" }}
         className="isolate z-50"
       >
         <PreviewCardPrimitive.Popup
