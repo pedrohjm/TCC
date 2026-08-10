@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
+import { cn } from '@/lib/utils'
 import { CATEGORIAS_SABOR, type CategoriaSaborValor, type InfoCategoriaSabor } from '@/lib/categorias-sabor'
 
 export interface Sabor {
@@ -22,12 +23,26 @@ interface GradeSaboresProps {
 
 // Foto com fallback: se o arquivo em public/images/cardapio/ ainda não
 // existir (nenhuma foto real foi tirada ainda), cai no ícone da categoria
-// — mesma ideia usada na logo (components/AppSidebar.tsx).
-function FotoSabor({ src, alt, icone: Icone }: { src: string | null; alt: string; icone: LucideIcon }) {
+// — mesma ideia usada na logo (components/AppSidebar.tsx). className/
+// tamanhoIcone permitem reaproveitar isso tanto no cartão (foto grande,
+// quadrada) quanto na miniatura ao lado do nome no preview do hover.
+function FotoSabor({
+  src,
+  alt,
+  icone: Icone,
+  className,
+  tamanhoIcone = 'h-10 w-10',
+}: {
+  src: string | null
+  alt: string
+  icone: LucideIcon
+  className?: string
+  tamanhoIcone?: string
+}) {
   const [falhou, setFalhou] = useState(!src)
 
   return (
-    <div className="flex aspect-square items-center justify-center overflow-hidden bg-muted">
+    <div className={cn('flex aspect-square items-center justify-center overflow-hidden bg-muted', className)}>
       {!falhou && src && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -37,7 +52,7 @@ function FotoSabor({ src, alt, icone: Icone }: { src: string | null; alt: string
           onError={() => setFalhou(true)}
         />
       )}
-      {falhou && <Icone className="h-10 w-10 text-muted-foreground/40" />}
+      {falhou && <Icone className={cn('text-muted-foreground/40', tamanhoIcone)} />}
     </div>
   )
 }
@@ -72,12 +87,23 @@ function CartaoSabor({ sabor }: { sabor: Sabor }) {
         </div>
       </HoverCardTrigger>
 
-      <HoverCardContent className="w-64 overflow-hidden rounded-lg p-0">
-        <div className="space-y-0.5 border-b border-border bg-muted/40 px-3 py-2">
-          <TagCategoria info={info} />
-          <p className="text-sm font-semibold">{sabor.nome}</p>
+      <HoverCardContent className="w-72 overflow-hidden rounded-lg p-0">
+        {/* topo: foto pequena + tag/nome ao lado, como no modelo (ícone do
+            item à esquerda, nome/atributos à direita) */}
+        <div className="flex items-center gap-3 border-b border-border bg-muted/40 p-3">
+          <FotoSabor
+            src={sabor.foto}
+            alt={sabor.nome}
+            icone={info.icone}
+            className="h-14 w-14 shrink-0 rounded-md"
+            tamanhoIcone="h-6 w-6"
+          />
+          <div className="space-y-0.5">
+            <TagCategoria info={info} />
+            <p className="text-sm leading-tight font-semibold">{sabor.nome}</p>
+          </div>
         </div>
-        <FotoSabor src={sabor.foto} alt={sabor.nome} icone={info.icone} />
+        {/* embaixo de tudo: descrição */}
         <div className="p-3">
           <p className="text-xs text-muted-foreground">{sabor.descricao}</p>
         </div>

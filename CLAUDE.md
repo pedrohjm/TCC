@@ -288,8 +288,7 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 12. ~~Cartão de sabor com preview lateral ao passar o mouse~~ ✅ concluído
     (2026-08-10), a partir de `public/images/modelo/Mouse_Sabores.pdf` — o
     cartão em `components/GradeSabores.tsx` mostra foto + tag + nome; ao
-    passar o mouse, abre uma janela com os mesmos dados (tag+nome no topo,
-    foto no meio, descrição embaixo) **só pro lado** (nunca em cima/embaixo
+    passar o mouse, abre uma janela **só pro lado** (nunca em cima/embaixo
     do cartão — testado tanto no meio da grade quanto na coluna da direita,
     onde flipa pra esquerda em vez de cair pra baixo). Usa `HoverCard` do
     shadcn (`components/ui/hover-card.tsx`, por cima do `@base-ui/react/
@@ -297,7 +296,13 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
     `collisionAvoidance={{ side: 'flip', fallbackAxisSide: 'none' }}` —
     `fallbackAxisSide: 'none'` é o que impede o eixo perpendicular
     (cima/baixo) de ser usado como fallback quando não cabe nem à direita
-    nem à esquerda. **Limitação conhecida:** é uma interação de hover, então
+    nem à esquerda. Dentro da janela, a foto é pequena (miniatura) com
+    tag+nome ao lado — não em cima dela — e a descrição fica embaixo de
+    tudo, layout ajustado pra ficar mais parecido com o `Mouse_Sabores.pdf`
+    (ícone pequeno + texto ao lado, informação extra abaixo). `FotoSabor`
+    ganhou props `className`/`tamanhoIcone` pra dar esses dois tamanhos
+    (grande e quadrada no cartão, miniatura no preview) sem duplicar
+    componente. **Limitação conhecida:** é uma interação de hover, então
     não existe em telas touch (celular/tablet sem mouse) — aceitável por
     enquanto porque essa tela normalmente é vista no balcão/totem, mas vale
     lembrar se um dia virar prioridade mobile.
