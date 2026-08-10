@@ -13,6 +13,7 @@ const TITULOS: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/login': 'Entrar',
   '/perfil': 'Editar perfil',
+  '/estabelecimento': 'Estabelecimento',
 }
 
 export function TituloPagina() {

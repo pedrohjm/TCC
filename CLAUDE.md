@@ -327,6 +327,29 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
     tela (DONO vê 7), a barra rola horizontalmente (`overflow-x-auto`) —
     testado que dá pra rolar até o último item e clicar nele. `SidebarInset`
     ganhou `pb-24` no mobile pra o conteúdo não ficar embaixo da barra.
+14. ~~Menu mobile reestruturado: 3 botões + submenu do cardápio + página
+    Estabelecimento~~ ✅ concluído (2026-08-10) — trocada a barra flutuante
+    de 5-7 itens (uma bolinha por categoria) por só **3 botões fixos** na
+    visão do cliente: **Início** (`/`), **Cardápio** (não navega — abre um
+    submenu vertical com as 5 categorias empilhado *pra cima* do botão,
+    mesmo estilo visual das bolinhas) e **Estabelecimento** (nova página,
+    `app/estabelecimento/page.tsx` — só reserva o lugar no menu por
+    enquanto, foto e descrição do local ficam pra depois). ATENDENTE vê os
+    3 + Registrar venda; DONO vê os 3 + Registrar venda + Dashboard.
+    `components/ui/gradient-menu.tsx` ganhou suporte a itens que são
+    **botão** (`onClick`, ex. o "Cardápio") além de itens que são **link**
+    (`href`) — mesmo visual pros dois. Lógica de estado nova em
+    `components/MenuMobile.tsx` (`cardapioAberto`), com um backdrop
+    invisível (`fixed inset-0`) que fecha o submenu ao tocar fora.
+    **Bug pego no teste:** o `onClick` de fechar o submenu só estava ligado
+    no botão; nos itens que são `<Link>` (as 5 categorias) ele nunca era
+    chamado, então navegar pra uma categoria deixava o submenu aberto por
+    cima da página nova. Corrigido passando `onClick` também pro `<Link>`
+    em `gradient-menu.tsx`.
+    `/estabelecimento` também virou pública no `proxy.ts` (mesmo grupo de
+    `/` e `/cardapio/*`) e ganhou um link no painel lateral do desktop
+    (grupo novo "Geral" — sem isso a página ficaria inacessível fora do
+    mobile).
 
 ## Convenções de código
 

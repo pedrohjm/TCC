@@ -11,9 +11,10 @@ import { authConfig } from './auth.config'
 // login completo, só de saber se já existe uma sessão.
 const { auth } = NextAuth(authConfig)
 
-// "/" e "/cardapio/*" são a visão do cliente (cardápio) — pública, sem
-// login, pra poder ser aberta num tablet da loja ou no celular do cliente.
-const CAMINHOS_PUBLICOS = ['/', '/cardapio']
+// "/", "/cardapio/*" e "/estabelecimento" são a visão do cliente — pública,
+// sem login, pra poder ser aberta num tablet da loja ou no celular do
+// cliente.
+const CAMINHOS_PUBLICOS = ['/', '/cardapio', '/estabelecimento']
 
 function ehCaminhoPublico(pathname: string) {
   return CAMINHOS_PUBLICOS.some(
