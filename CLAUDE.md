@@ -350,6 +350,40 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
     `/` e `/cardapio/*`) e ganhou um link no painel lateral do desktop
     (grupo novo "Geral" — sem isso a página ficaria inacessível fora do
     mobile).
+15. ~~Página Estabelecimento: foto + endereço + mapa interativo~~ ✅
+    concluído (2026-08-10) — conteúdo real de `/estabelecimento`, no estilo
+    do modelo em `public/images/modelo/Localizacao.pdf` (foto grande no
+    topo com um pino sobreposto, "Confira nossa localização!" + endereço
+    em pílula). No lugar do `@` do Instagram do modelo, um **mapa
+    interativo clicável** (expande ao clicar, mostra tiles reais
+    OpenStreetMap/Carto centrados nas coordenadas). Componente adaptado de
+    um componente de terceiros ("expanded-map", usa a lib `motion`) em
+    `components/ui/expanded-map.tsx`; `components/MapaEstabelecimento.tsx`
+    escolhe tiles claro/escuro (`carto-light`/`carto-dark`) conforme o tema
+    do site. Endereço e coordenadas do mapa **ainda são genéricos**
+    (placeholder em Brasília) — centralizados em `lib/estabelecimento.ts`
+    pra trocar fácil quando o endereço real da loja for definido, sem
+    precisar mexer no componente. Foto da fachada segue a mesma convenção
+    de fallback das outras imagens do site (`public/images/banners/estabelecimento.jpg`,
+    ainda não existe → cai num ícone de loja).
+    **Bug real encontrado e corrigido nessa etapa (afetava também `FundoPagina`
+    e `FotoSabor`, não só a página nova):** o fallback de imagem quebrada
+    (`<img onError>`) não disparava quando o arquivo já não existe desde o
+    início (nosso caso — nenhuma imagem real foi adicionada ainda). Como a
+    página é renderizada no servidor, o navegador já começa a baixar a
+    imagem antes do React terminar de hidratar; num 404 rápido (localhost),
+    o evento `error` nativo dispara e se perde antes do listener do React
+    ser anexado, e o `onError` nunca roda — o resultado visível era o ícone
+    de imagem quebrada do navegador em vez do fallback bonito. Ficava
+    escondido no `FundoPagina` (atrás do header semi-transparente, canto
+    0,0) e no `FotoSabor` (card pequeno, fácil de não notar), mas ficou bem
+    visível no card grande da foto do Estabelecimento. Corrigido com um
+    hook compartilhado, `hooks/use-imagem-com-fallback.ts`, que checa
+    `img.complete && img.naturalWidth === 0` num `useEffect` de mount (pega
+    o 404-antes-da-hidratação) além do `onError` (pega falhas depois de
+    montado, ex. rede lenta). `FundoPagina`, `FotoSabor` (em
+    `GradeSabores.tsx`) e `FotoEstabelecimento` foram migrados pra esse
+    hook único em vez de cada um ter seu próprio `useState`.
 
 ## Convenções de código
 
@@ -371,7 +405,9 @@ nome/senha): `/` é a home pública do cardápio, `/cardapio/<slug>` tem as 5
 categorias — **Sabores 1800ml já implementada de verdade** (filtro por
 categoria + grade de cards, model `Sabor` novo no banco, `GET /api/sabores`
 público), as outras 4 (SelfService, Picolés, Acompanhamentos, Bebidas)
-ainda "em breve",
+ainda "em breve", `/estabelecimento` também já implementada de verdade
+(foto + endereço + mapa interativo — endereço/coordenadas ainda genéricos,
+ver `lib/estabelecimento.ts`),
 `/vendas` tem a tela de registro de vendas (funcional, sem design refinado —
 só ganhou a sidebar/tema do shadcn ao redor). Páginas protegidas por
 `proxy.ts` (exceto `/`, `/cardapio/*` e os arquivos estáticos de `/public`,

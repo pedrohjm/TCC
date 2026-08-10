@@ -19,6 +19,9 @@ em `/images/logo/logo.png`).
   Fruta/Azedo) em vez de quebrar. As outras categorias (SelfService,
   Picolés, Acompanhamentos, Bebidas) ainda são só "em breve", sem uso de
   imagem ainda.
+- `banners/estabelecimento.jpg` — foto da fachada/interior da loja, usada
+  no topo da página `/estabelecimento`. Sem esse arquivo, cai num fundo em
+  gradiente com o ícone da loja.
 - `banners/` — imagens maiores (ex. banner da home), se um dia a home
   precisar de uma foto em vez do fundo colorido atual.
 

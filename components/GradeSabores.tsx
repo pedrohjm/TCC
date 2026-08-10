@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { cn } from '@/lib/utils'
 import { CATEGORIAS_SABOR, type CategoriaSaborValor, type InfoCategoriaSabor } from '@/lib/categorias-sabor'
+import { useImagemComFallback } from '@/hooks/use-imagem-com-fallback'
 
 export interface Sabor {
   id: number
@@ -39,17 +39,18 @@ function FotoSabor({
   className?: string
   tamanhoIcone?: string
 }) {
-  const [falhou, setFalhou] = useState(!src)
+  const { falhou, imgRef, onError } = useImagemComFallback(src)
 
   return (
     <div className={cn('flex aspect-square items-center justify-center overflow-hidden bg-muted', className)}>
       {!falhou && src && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
+          ref={imgRef}
           src={src}
           alt={alt}
           className="h-full w-full object-cover"
-          onError={() => setFalhou(true)}
+          onError={onError}
         />
       )}
       {falhou && <Icone className={cn('text-muted-foreground/40', tamanhoIcone)} />}

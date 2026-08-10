@@ -1,25 +1,31 @@
-import { Store } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { MapPin } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { FotoEstabelecimento } from '@/components/FotoEstabelecimento'
+import { MapaEstabelecimento } from '@/components/MapaEstabelecimento'
+import { ENDERECO_ESTABELECIMENTO } from '@/lib/estabelecimento'
 
-// Só reserva o lugar no menu por enquanto — foto e descrição do
-// estabelecimento entram depois (pedido do usuário: "faça somente o lugar
-// dela no menu semelhante aos outros").
+// Estilo do modelo em public/images/modelo/Localizacao.pdf: foto grande
+// no topo, "Confira nossa localização!" + endereço em pílula logo abaixo,
+// e — no lugar do @ do Instagram do modelo — um mapa interativo (clicável)
+// em vez de rede social. Endereço e coordenadas ainda são genéricos, ver
+// lib/estabelecimento.ts.
 export default function PaginaEstabelecimento() {
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-1 items-center justify-center p-6">
-      <Card className="w-full">
-        <CardHeader className="flex flex-row items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Store className="h-5 w-5" />
+    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col p-4">
+      <Card className="gap-0 overflow-hidden py-0">
+        <FotoEstabelecimento />
+
+        <CardContent className="flex flex-col items-center gap-4 py-6 text-center">
+          <h2 className="font-heading text-2xl font-semibold text-balance">
+            Confira nossa localização!
+          </h2>
+
+          <span className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+            <MapPin className="h-4 w-4 shrink-0" />
+            {ENDERECO_ESTABELECIMENTO}
           </span>
-          <div className="flex flex-1 items-center justify-between gap-2">
-            <CardTitle className="text-lg">Estabelecimento</CardTitle>
-            <Badge variant="secondary">Em breve</Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>Foto e descrição do local ainda vão ser adicionadas aqui.</p>
+
+          <MapaEstabelecimento />
         </CardContent>
       </Card>
     </div>
