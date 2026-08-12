@@ -426,6 +426,33 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
     - `app/globals.css` ganhou a utility `no-scrollbar` (Tailwind v4,
       `@utility`) pro carrossel não mostrar a barra de rolagem no meio do
       conteúdo.
+17. ~~Logo em formato de bandeira/flâmula + tirar o papel do lado do nome~~
+    ✅ concluído (2026-08-12) — o banner largo da logo (item 8 da lista)
+    virou uma **bandeira**: hexágono alongado com pontas nas duas laterais
+    (`clip-path: polygon(...)`), moldura menta (`bg-accent`) por baixo de
+    um corpo morango (gradiente `primary`), e a logo centralizada numa
+    placa branca quadrada no meio. Novo componente
+    `components/LogoBandeira.tsx`. Duas decisões técnicas por trás disso:
+    - a imagem do logo (`public/images/logo/Logo.png`) **não tem fundo
+      transparente** (conferido com `sharp` — `hasAlpha: false`), é um
+      canvas branco sólido. Colar ela direto na cor da bandeira deixaria um
+      retângulo branco solto por cima; por isso a placa branca existe de
+      propósito (o "medalhão" da bandeira), do mesmo jeito que o modelo de
+      referência (`modelo.pdf`, o "TBH" do taskbarhero.wiki) também tem o
+      ícone dentro de uma placa com moldura própria, não direto no banner;
+    - a placa é **quadrada**, não larga: a logo em si é uma composição
+      quadrada (ícone em cima, "Q10 Sorvetes" embaixo dele), então uma
+      placa larga (tentativa inicial) deixava bastante fundo branco vazio
+      dos dois lados — o objeto `object-contain` encolhe pela dimensão
+      menor, e numa placa larga essa dimensão é a altura.
+    - Mesma convenção de fallback do resto do site
+      (`hooks/use-imagem-com-fallback.ts`): sem o arquivo, cai no ícone de
+      loja dentro da placa.
+    - Também saiu o texto "Cardápio & sistema" que ficava do lado da logo
+      — não tinha mais lugar óbvio ao lado de uma bandeira centralizada, e
+      o pedido era só a bandeira.
+    - No cabeçalho, o `({papel})` que aparecia do lado do nome do usuário
+      logado (ex. "Ana Souza (DONO)") saiu — só o nome fica.
 
 ## Convenções de código
 

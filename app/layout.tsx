@@ -5,6 +5,7 @@ import "./globals.css";
 import { auth, signOut } from "@/auth";
 import { AppSidebar } from "@/components/AppSidebar";
 import { FundoPagina } from "@/components/FundoPagina";
+import { LogoBandeira } from "@/components/LogoBandeira";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TituloPagina } from "@/components/TituloPagina";
@@ -68,19 +69,11 @@ export default async function RootLayout({
                   em vez de ficar colada na borda da janela do navegador. */}
               <div className="mx-auto flex w-full max-w-[1080px] items-center justify-between gap-3 px-4 py-2">
                 <div className="flex items-center gap-2">
-                  {/* Logo em formato de banner — a imagem já traz o nome da
-                      loja escrito nela, então mostramos ela grande e sem
-                      caixa/borda ao redor, em vez do bloco quadrado de antes. */}
-                  <Link href="/" className="flex items-center gap-2 py-1">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src="/images/logo/Logo.png"
-                      alt="Q10 Sorvetes"
-                      className="h-10 w-auto object-contain"
-                    />
-                    <span className="hidden text-xs text-muted-foreground sm:inline">
-                      Cardápio &amp; sistema
-                    </span>
+                  {/* Logo em formato de bandeira/flâmula (ver
+                      components/LogoBandeira.tsx), no lugar do banner largo
+                      de antes. */}
+                  <Link href="/" className="flex items-center py-1" aria-label="Q10 Sorvetes">
+                    <LogoBandeira />
                   </Link>
                 </div>
 
@@ -88,9 +81,10 @@ export default async function RootLayout({
                   <ThemeToggle />
                   {sessao?.user ? (
                     <>
+                      {/* Só o nome — sem o papel (DONO/ATENDENTE) do lado,
+                          não é uma informação que o usuário precisa ver aqui. */}
                       <span className="hidden text-sm text-muted-foreground sm:inline">
-                        {sessao.user.name}{" "}
-                        <span className="text-muted-foreground/70">({sessao.user.papel})</span>
+                        {sessao.user.name}
                       </span>
                       <Button
                         variant="ghost"
