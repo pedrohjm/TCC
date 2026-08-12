@@ -1,6 +1,6 @@
-import { MapPin } from 'lucide-react'
+import { MapPin, Store } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { FotoEstabelecimento } from '@/components/FotoEstabelecimento'
+import { FotoDestaque } from '@/components/FotoDestaque'
 import { MapaEstabelecimento } from '@/components/MapaEstabelecimento'
 import { ENDERECO_ESTABELECIMENTO } from '@/lib/estabelecimento'
 
@@ -13,7 +13,12 @@ export default function PaginaEstabelecimento() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col p-4">
       <Card className="gap-0 overflow-hidden py-0">
-        <FotoEstabelecimento />
+        <FotoDestaque
+          src="/images/banners/estabelecimento.jpg"
+          alt="Fachada da Q10 Sorvetes"
+          iconeFallback={<Store />}
+          iconeBadge={<MapPin />}
+        />
 
         <CardContent className="flex flex-col items-center gap-4 py-6 text-center">
           <h2 className="font-heading text-2xl font-semibold text-balance">

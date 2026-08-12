@@ -384,6 +384,48 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
     montado, ex. rede lenta). `FundoPagina`, `FotoSabor` (em
     `GradeSabores.tsx`) e `FotoEstabelecimento` foram migrados pra esse
     hook único em vez de cada um ter seu próprio `useState`.
+16. ~~Home repaginada: foto de topo + carrossel de avisos~~ ✅ concluído
+    (2026-08-10) — a home (`/`) agora começa com uma **foto grande no mesmo
+    estilo da página Estabelecimento** e, logo abaixo, um **carrossel de
+    cards de avisos** com efeito 3D (o card inclina seguindo o mouse). A
+    faixa em degradê com "Bem-vindo(a)" saiu; o texto passou pra baixo da
+    foto, dentro do mesmo card. Os 5 cards de categoria continuam embaixo.
+    - **`components/FotoDestaque.tsx`** (novo) — a foto de topo virou um
+      componente só, usado pela home e pela Estabelecimento (que antes
+      tinha o seu `FotoEstabelecimento.tsx`, agora removido). Os ícones
+      (selo e fallback) entram como `ReactNode` (JSX pronto), não como
+      componente: `LucideIcon` é uma *função*, e função não atravessa a
+      fronteira server→client — passar o componente quebraria com
+      "Functions cannot be passed directly to Client Components". Na home
+      a foto é mais baixa (`aspect-16/9 sm:aspect-16/7`) porque, na
+      proporção 16:10 da Estabelecimento, ela sozinha ocupava a tela
+      inteira e empurrava os avisos pra fora da primeira dobra.
+    - **`components/ui/standard-card.tsx`** (novo) — card 3D + carrossel,
+      adaptado do componente de terceiros "standard-card". Mudanças em
+      relação ao original: usa `motion/react` em vez de `framer-motion`
+      (mesma API, e o pacote `motion` já estava instalado pro mapa —
+      instalar os dois seria a mesma biblioteca duas vezes); cores vêm dos
+      tokens do tema em vez de `bg-white`/`text-black` fixos (senão o card
+      ficaria branco no modo escuro); o original era uma página inteira
+      (fundo `#0a0a0a`, spotlight, textura de ruído de uma URL externa e um
+      `<style>` pintando o `body`) e tudo isso saiu, porque sobrescreveria
+      o layout/tema do site; sem `cursor-none` (o cursor sumiria, já que
+      não existe cursor customizado aqui) e sem o hook `useLenis` (mexia no
+      `scroll-behavior` do documento inteiro); cards menores, porque o
+      painel de conteúdo tem ~730px úteis e os 380x450px do original não
+      caberiam; e a rolagem do carrossel usa a largura do próprio carrossel
+      em vez de `window.innerWidth`, que aqui passaria muito do fim.
+    - **`lib/avisos.ts`** (novo) — os avisos em si, ainda com texto
+      genérico pra trocar depois (mesma ideia de `lib/estabelecimento.ts`).
+      Se um dia a loja precisar editar isso sem mexer no código, vira um
+      model no Prisma + tela de gestão pro DONO.
+    - `components/AvisosHome.tsx` é client component e importa `AVISOS`
+      ele mesmo, em vez de receber a lista por prop da home (que é server
+      component) — de novo o problema do ícone-função na fronteira. Mesmo
+      padrão do `MenuMobile`, que importa `ITENS_CARDAPIO` direto.
+    - `app/globals.css` ganhou a utility `no-scrollbar` (Tailwind v4,
+      `@utility`) pro carrossel não mostrar a barra de rolagem no meio do
+      conteúdo.
 
 ## Convenções de código
 
@@ -401,7 +443,8 @@ DONO), e o site (shadcn/ui) no layout do modelo de referência — topo isolado
 com a logo em banner, e abaixo dois painéis separados (menu + conteúdo) num
 quadro estreito e centralizado, com o fundo aparecendo em volta, dark mode
 de verdade (botão sol/lua) e página de editar perfil (`/perfil`, trocar
-nome/senha): `/` é a home pública do cardápio, `/cardapio/<slug>` tem as 5
+nome/senha): `/` é a home pública (foto de topo + carrossel de avisos +
+atalhos das categorias), `/cardapio/<slug>` tem as 5
 categorias — **Sabores 1800ml já implementada de verdade** (filtro por
 categoria + grade de cards, model `Sabor` novo no banco, `GET /api/sabores`
 público), as outras 4 (SelfService, Picolés, Acompanhamentos, Bebidas)

@@ -120,6 +120,16 @@
   --sidebar-ring: oklch(0.68 0.19 18);
 }
 
+/* Esconde a barra de rolagem sem perder a rolagem em si — usada no
+   carrossel horizontal de avisos da home (components/ui/standard-card.tsx),
+   onde a barra ficaria bem no meio do conteúdo. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
