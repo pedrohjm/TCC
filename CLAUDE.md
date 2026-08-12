@@ -427,27 +427,36 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       `@utility`) pro carrossel não mostrar a barra de rolagem no meio do
       conteúdo.
 17. ~~Logo em formato de bandeira/flâmula + tirar o papel do lado do nome~~
-    ✅ concluído (2026-08-12) — o banner largo da logo (item 8 da lista)
-    virou uma **bandeira**: hexágono alongado com pontas nas duas laterais
-    (`clip-path: polygon(...)`), moldura menta (`bg-accent`) por baixo de
-    um corpo morango (gradiente `primary`), e a logo centralizada numa
-    placa branca quadrada no meio. Novo componente
-    `components/LogoBandeira.tsx`. Duas decisões técnicas por trás disso:
-    - a imagem do logo (`public/images/logo/Logo.png`) **não tem fundo
-      transparente** (conferido com `sharp` — `hasAlpha: false`), é um
-      canvas branco sólido. Colar ela direto na cor da bandeira deixaria um
-      retângulo branco solto por cima; por isso a placa branca existe de
-      propósito (o "medalhão" da bandeira), do mesmo jeito que o modelo de
-      referência (`modelo.pdf`, o "TBH" do taskbarhero.wiki) também tem o
-      ícone dentro de uma placa com moldura própria, não direto no banner;
-    - a placa é **quadrada**, não larga: a logo em si é uma composição
-      quadrada (ícone em cima, "Q10 Sorvetes" embaixo dele), então uma
-      placa larga (tentativa inicial) deixava bastante fundo branco vazio
-      dos dois lados — o objeto `object-contain` encolhe pela dimensão
-      menor, e numa placa larga essa dimensão é a altura.
+    ✅ concluído (2026-08-12, ajustado no mesmo dia) — o banner largo da
+    logo (item 8 da lista) virou uma **bandeira**: hexágono alongado com
+    pontas nas duas laterais (`clip-path: polygon(...)`), moldura menta
+    (`bg-accent`) por baixo de um corpo morango (gradiente `primary`).
+    Novo componente `components/LogoBandeira.tsx`.
+    - Versão inicial: a imagem do logo (`public/images/logo/Logo.png`)
+      não tinha fundo transparente (`hasAlpha: false`, canvas branco
+      sólido), então a logo ficava centralizada numa placa branca
+      quadrada — senão um retângulo branco solto apareceria sobre a cor
+      da bandeira.
+    - **Depois o usuário trocou o arquivo por uma versão com fundo
+      transparente de verdade**, e a placa branca saiu — a logo (só o
+      anel amarelo + texto, sem plaquinha) fica direto sobre o corpo da
+      bandeira agora, com `drop-shadow-sm` pra não sumir contra o
+      morango. Ícone de fallback (`Store`) também mudou de cor pra
+      `text-primary-foreground/80` (antes era `text-muted-foreground/50`
+      sobre a placa branca).
+    - **Bug pego no export do usuário:** o novo `Logo.png` tinha o fundo
+      removido só até alpha=128 (50% opaco), não alpha=0 — dava um halo
+      esbranquiçado/rosado em volta do desenho em vez de transparência de
+      verdade (visível claramente contra o morango da bandeira). Conferido
+      com `sharp` (histograma de alpha: platô grande em 128, rampa suave
+      129-254 de antialiasing, platô em 255 na arte opaca — a área
+      "removida" ficou pela metade, não zerada). Corrigido remapeando o
+      canal alpha (`(a-128)/(255-128)*255`, clampado): fundo vira alpha=0
+      de verdade e o antialiasing da borda continua suave. Script não
+      ficou salvo no repo (rodado uma vez direto no arquivo).
     - Mesma convenção de fallback do resto do site
       (`hooks/use-imagem-com-fallback.ts`): sem o arquivo, cai no ícone de
-      loja dentro da placa.
+      loja.
     - Também saiu o texto "Cardápio & sistema" que ficava do lado da logo
       — não tinha mais lugar óbvio ao lado de uma bandeira centralizada, e
       o pedido era só a bandeira.
