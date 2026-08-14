@@ -495,6 +495,44 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       `components/ui/gradient-menu.tsx`) em vez de uma classe fixa por
       rede — o original usava `<style jsx>` com uma classe por marca, que
       não é usado em nenhum outro lugar do projeto.
+19. ~~Seção "Sobre nós" na home + tirar os cards de categoria de lá~~ ✅
+    concluído (2026-08-14) — nova seção antes do "Fale conosco"
+    (`components/ui/about-us-section.tsx` + `components/SobreNos.tsx`,
+    dados em `lib/sobre-nos.ts`), adaptada do componente de terceiros
+    "about-us-section": rótulo pequeno no topo, título com barrinha que
+    cresce, texto de apresentação, foto com moldura deslocada atrás e
+    bolinhas flutuantes, itens com ícone em caixa arredondada e
+    contadores que sobem quando entram na tela.
+    - **Layout reorganizado** em relação ao original: lá a foto fica no
+      meio com os itens em colunas dos dois lados (grid de 3 colunas,
+      `max-w-6xl`). Aqui o painel de conteúdo tem ~680px úteis (quadro
+      central limitado a 1080px, menu lateral come 252px), o que daria
+      ~200px por coluna — estreito demais pra um parágrafo. Virou foto
+      centralizada no topo + itens em 2 colunas (`lg:grid-cols-2`) abaixo.
+    - `motion/react` no lugar de `framer-motion`, cores dos tokens do
+      tema no lugar das cores fixas do original (#F2F2EB/#202e44/#88734C),
+      foto de `public/images/banners/sobre.jpg` com fallback no lugar do
+      link do Unsplash.
+    - Saiu o CTA final do original ("Ready to transform your space?") —
+      o "Fale conosco" vem logo abaixo e faz esse papel. Saiu também o
+      "Learn more" de cada item, que no original é invisível de qualquer
+      jeito (`initial` e `animate` os dois com `opacity: 0`).
+    - **`useScroll` precisou do `container`**: o parallax dos borrões de
+      fundo depende do progresso de rolagem, mas quem rola aqui não é a
+      janela — é o painel de conteúdo (`overflow-y-auto` em
+      `app/layout.tsx`, o `<body>` é `overflow-hidden`). Sem passar
+      `container`, `scrollYProgress` fica sempre em 0 e o efeito não
+      acontece. O componente acha o painel sozinho com
+      `closest('.overflow-y-auto')`.
+    - **Números são placeholder** (30 sabores, 10 anos, 5000 clientes,
+      98%) — marcado em maiúsculas no `lib/sobre-nos.ts`. Número inventado
+      em site de loja é informação errada pro cliente, tem que trocar
+      pelos reais antes de mostrar pra alguém de fora.
+    - Os 5 cards de categoria que ficavam na home (atalho pra
+      `/cardapio/<slug>`) saíram a pedido do usuário. A navegação pras
+      categorias continua no menu lateral (desktop) e no submenu do botão
+      "Cardápio" da barra de baixo (mobile), então nenhuma página ficou
+      inacessível.
 
 ## Convenções de código
 

@@ -25,6 +25,9 @@ em `/images/logo/logo.png`).
 - `banners/home.jpg` — foto do topo da home (`/`), mesmo formato e mesmo
   fallback da de cima (as duas usam `components/FotoDestaque.tsx`).
   Proporção 16:10 é a que melhor se encaixa sem cortar.
+- `banners/sobre.jpg` — foto da seção "Sobre nós" da home (equipe, loja
+  por dentro, o que fizer sentido). Proporção 4:3. Sem o arquivo, cai no
+  ícone de loja.
 - `banners/` — imagens maiores (ex. banner da home), se um dia a home
   precisar de uma foto em vez do fundo colorido atual.
 
