@@ -3,6 +3,7 @@ import { IceCreamBowl, Store } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { AvisosHome } from '@/components/AvisosHome'
+import { FaleConosco } from '@/components/FaleConosco'
 import { FotoDestaque } from '@/components/FotoDestaque'
 import { ITENS_CARDAPIO } from '@/lib/nav-cardapio'
 
@@ -65,6 +66,8 @@ export default function Home() {
           )
         })}
       </section>
+
+      <FaleConosco />
     </div>
   )
 }

@@ -462,6 +462,39 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       o pedido era só a bandeira.
     - No cabeçalho, o `({papel})` que aparecia do lado do nome do usuário
       logado (ex. "Ana Souza (DONO)") saiu — só o nome fica.
+18. ~~Seção "Fale conosco" na home (WhatsApp/Instagram/Facebook)~~ ✅
+    concluído (2026-08-14) — nova seção no fim da home
+    (`components/FaleConosco.tsx`): ícone circular por rede que levanta e
+    ganha um brilho na cor oficial da marca ao passar o mouse/tocar,
+    adaptado do componente de terceiros "connect-with-us". Sem
+    redirecionamento ainda (pedido explícito do usuário) — por isso os
+    ícones são `<button>`, não `<a>`: sem número de WhatsApp/@ do
+    Instagram/página do Facebook reais ainda, não fazia sentido fingir que
+    é um link. Quando tiver os links de verdade, trocar `<button>` por
+    `<a href={...}>` dentro de `IconeRedeSocial`.
+    - Ícones vêm do pacote **`simple-icons`** (só `.path`/`.hex` de
+      `siWhatsapp`/`siInstagram`/`siFacebook`) em vez de transcrever o SVG
+      da marca na mão — `lucide-react` nessa versão não tem mais ícones de
+      marca (`Instagram`/`Facebook`/etc. foram removidos, só sobrou
+      `MessageCircle` e afins), e transcrever path data de memória arrisca
+      erro. Isso não conflita com o "lucide é a única lib de ícones do
+      projeto" (decisão anterior sobre `react-icons`): `simple-icons` não é
+      uma lib de ícones de UI, é só dado (path + hex oficial de cada
+      marca), usada só aqui.
+    - **Custo zero no bundle do cliente:** `FaleConosco.tsx` não tem `'use
+      client'` — é Server Component puro (sem hook, sem handler de
+      evento), então o `path`/`hex` do `simple-icons` só existem no HTML
+      renderizado no servidor, nunca viram JS enviado pro navegador.
+      Conferido no build: nenhum chunk em `.next/static/chunks` contém o
+      path do WhatsApp, e o total de chunks (~1.7MB) é bem menor que o
+      pacote `simple-icons` inteiro (~5MB, todas as ~3000 marcas) — o
+      import nomeado (`{ siWhatsapp, siInstagram, siFacebook }`) faz o
+      bundler descartar o resto.
+    - Efeito de brilho na cor da marca usa uma CSS var por item
+      (`--cor-marca`, igual à técnica do `GradientMenu` em
+      `components/ui/gradient-menu.tsx`) em vez de uma classe fixa por
+      rede — o original usava `<style jsx>` com uma classe por marca, que
+      não é usado em nenhum outro lugar do projeto.
 
 ## Convenções de código
 
