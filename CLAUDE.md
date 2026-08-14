@@ -426,6 +426,15 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
     - `app/globals.css` ganhou a utility `no-scrollbar` (Tailwind v4,
       `@utility`) pro carrossel não mostrar a barra de rolagem no meio do
       conteúdo.
+    - **`overflow-y-hidden` explícito no carrossel** (corrigido depois, a
+      pedido do usuário: "na parte dos avisos está com um scroll vertical
+      esquisito"). Só com `overflow-x-auto`, o CSS promove o eixo Y de
+      `visible` pra `auto` sozinho — e havia 18px de sobra vertical porque
+      os cards que ainda não entraram na tela ficam parados no `y: 30` da
+      animação de entrada. Resultado: dava pra rolar o carrossel pra baixo
+      com a rodinha do mouse, e a rodinha em cima dele não rolava a página.
+      Conferido depois do conserto: a roda em cima do carrossel rola a
+      página normalmente e o `scrollTop` dele fica em 0.
 17. ~~Logo em formato de bandeira/flâmula + tirar o papel do lado do nome~~
     ✅ concluído (2026-08-12, ajustado no mesmo dia) — o banner largo da
     logo (item 8 da lista) virou uma **bandeira**: hexágono alongado com
@@ -517,13 +526,23 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       o "Fale conosco" vem logo abaixo e faz esse papel. Saiu também o
       "Learn more" de cada item, que no original é invisível de qualquer
       jeito (`initial` e `animate` os dois com `opacity: 0`).
-    - **`useScroll` precisou do `container`**: o parallax dos borrões de
-      fundo depende do progresso de rolagem, mas quem rola aqui não é a
-      janela — é o painel de conteúdo (`overflow-y-auto` em
-      `app/layout.tsx`, o `<body>` é `overflow-hidden`). Sem passar
-      `container`, `scrollYProgress` fica sempre em 0 e o efeito não
-      acontece. O componente acha o painel sozinho com
-      `closest('.overflow-y-auto')`.
+    - **O parallax do fundo foi removido logo depois (rolagem travada).**
+      A primeira versão movia os borrões do fundo conforme a rolagem, como
+      no original. O usuário reclamou que "o scroll ficou estranho" e a
+      medição confirmou: contando os quadros durante uma rolagem contínua,
+      ~16 de 105 passavam de 32ms (contra ~2 sem os borrões). Motivo: mover
+      um elemento com `blur(64px)` obriga o navegador a refazer o desfoque
+      a cada quadro. `will-change: transform` **piorou** (42 quadros
+      longos) — promover pra camada própria não ajuda quando o conteúdo da
+      camada é um desfoque grande. Mesmo **parado**, o `blur` ainda custava
+      (~12 quadros longos), porque a rolagem repinta a área. Solução:
+      trocar o círculo sólido + `blur-3xl` por um `radial-gradient`, que dá
+      a mesma mancha suave sem passar por filtro nenhum → 0-2 quadros
+      longos. Com isso saiu junto todo o `useScroll` (e a gambiarra de
+      achar o painel rolável com `closest('.overflow-y-auto')`, necessária
+      porque quem rola aqui não é a janela e sim o painel de conteúdo).
+      **Lição pra próxima:** `blur` grande + rolagem não combinam; pra
+      manchas decorativas use `radial-gradient`.
     - **Números são placeholder** (30 sabores, 10 anos, 5000 clientes,
       98%) — marcado em maiúsculas no `lib/sobre-nos.ts`. Número inventado
       em site de loja é informação errada pro cliente, tem que trocar

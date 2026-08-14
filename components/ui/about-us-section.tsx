@@ -1,15 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import {
-  motion,
-  useInView,
-  useScroll,
-  useSpring,
-  useTransform,
-  type MotionValue,
-  type Variants,
-} from 'motion/react'
+import { useEffect, useRef } from 'react'
+import { motion, useInView, useSpring, useTransform, type Variants } from 'motion/react'
 import { Store, Zap, type LucideIcon } from 'lucide-react'
 import { useImagemComFallback } from '@/hooks/use-imagem-com-fallback'
 
@@ -73,23 +65,6 @@ export function AboutUsSection({
   const estaVisivel = useInView(secaoRef, { once: true, amount: 0.1 })
   const numerosVisiveis = useInView(numerosRef, { once: true, amount: 0.3 })
 
-  // Parallax dos borrões decorativos do fundo. `container` aponta pro
-  // painel rolável do layout (o <body> não rola, ver app/layout.tsx), senão
-  // o progresso de scroll fica sempre em 0 e o efeito não acontece.
-  const [containerRolagem, setContainerRolagem] = useState<HTMLElement | null>(null)
-  useEffect(() => {
-    setContainerRolagem(secaoRef.current?.closest<HTMLElement>('.overflow-y-auto') ?? null)
-  }, [])
-
-  const { scrollYProgress } = useScroll({
-    target: secaoRef,
-    container: containerRolagem ? { current: containerRolagem } : undefined,
-    offset: ['start end', 'end start'],
-  })
-
-  const y1 = useTransform(scrollYProgress, [0, 1], [0, -50])
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, 50])
-
   const variantesContainer: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.2 } },
@@ -102,16 +77,29 @@ export function AboutUsSection({
 
   return (
     <section ref={secaoRef} className="relative overflow-hidden rounded-xl bg-muted/40 px-4 py-12 sm:px-6">
-      {/* borrões decorativos */}
-      <motion.div
+      {/* Manchas decorativas do fundo. O original usava um círculo sólido
+          com `blur(64px)` e ainda o movia com a rolagem (parallax) — as
+          duas coisas custam caro: medindo os quadros durante a rolagem,
+          com parallax dava ~16 de 105 quadros acima de 32ms; parado mas
+          ainda com `blur`, ~12; sem nada, 0. O desfoque é refeito a cada
+          repintura da rolagem, e `will-change: transform` só piorou (42).
+          Um `radial-gradient` dá o mesmo visual de mancha suave sem passar
+          por filtro nenhum — é só pintura de gradiente. */}
+      <div
         aria-hidden
-        className="pointer-events-none absolute -top-10 -left-10 h-56 w-56 rounded-full bg-primary/10 blur-3xl"
-        style={{ y: y1 }}
+        className="pointer-events-none absolute -top-16 -left-16 h-64 w-64 rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, color-mix(in oklab, var(--primary) 22%, transparent), transparent 70%)',
+        }}
       />
-      <motion.div
+      <div
         aria-hidden
-        className="pointer-events-none absolute -right-10 -bottom-10 h-64 w-64 rounded-full bg-accent/20 blur-3xl"
-        style={{ y: y2 }}
+        className="pointer-events-none absolute -right-16 -bottom-16 h-72 w-72 rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, color-mix(in oklab, var(--accent) 55%, transparent), transparent 70%)',
+        }}
       />
 
       <motion.div
@@ -142,7 +130,7 @@ export function AboutUsSection({
         </motion.p>
 
         <motion.div className="mt-10 flex justify-center" variants={variantesItem}>
-          <FotoSobreNos src={imagemSrc} alt={imagemAlt} y1={y1} y2={y2} />
+          <FotoSobreNos src={imagemSrc} alt={imagemAlt} />
         </motion.div>
 
         <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
@@ -167,17 +155,7 @@ export function AboutUsSection({
 }
 
 // Foto com a moldura deslocada atrás e as bolinhas flutuantes do original.
-function FotoSobreNos({
-  src,
-  alt,
-  y1,
-  y2,
-}: {
-  src: string
-  alt: string
-  y1: MotionValue<number>
-  y2: MotionValue<number>
-}) {
+function FotoSobreNos({ src, alt }: { src: string; alt: string }) {
   const { falhou, imgRef, onError } = useImagemComFallback(src)
 
   return (
@@ -208,16 +186,8 @@ function FotoSobreNos({
       <div aria-hidden className="absolute inset-0 -z-10 -m-3 rounded-lg border-4 border-accent" />
 
       {/* bolinhas de enfeite */}
-      <motion.div
-        aria-hidden
-        className="absolute -top-4 -right-6 h-14 w-14 rounded-full bg-primary/10"
-        style={{ y: y1 }}
-      />
-      <motion.div
-        aria-hidden
-        className="absolute -bottom-5 -left-8 h-16 w-16 rounded-full bg-accent/25"
-        style={{ y: y2 }}
-      />
+      <div aria-hidden className="absolute -top-4 -right-6 h-14 w-14 rounded-full bg-primary/10" />
+      <div aria-hidden className="absolute -bottom-5 -left-8 h-16 w-16 rounded-full bg-accent/25" />
       <motion.div
         aria-hidden
         className="absolute -top-7 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-primary"

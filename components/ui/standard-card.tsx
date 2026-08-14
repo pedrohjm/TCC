@@ -154,11 +154,16 @@ export function StandardCardCarousel({ itens, className }: StandardCardCarouselP
         </button>
       </div>
 
-      {/* py-*: dá espaço pro card crescer/inclinar sem ser cortado pelo
-          overflow do carrossel. */}
+      {/* `overflow-y-hidden` explícito: só com `overflow-x-auto`, o CSS
+          promove o eixo Y de `visible` pra `auto` sozinho, e o carrossel
+          virava uma caixa que também rolava ~18px na vertical (os cards
+          que ainda não entraram na tela ficam parados no `y: 30` da
+          animação de entrada e sobram embaixo). Dava pra rolar o carrossel
+          pra baixo com a rodinha do mouse, o que não faz sentido nenhum.
+          py-*: espaço pro card levantar/inclinar sem ser cortado. */}
       <div
         ref={carrosselRef}
-        className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-1 py-3"
+        className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-hidden scroll-smooth px-1 py-3"
         style={{ perspective: '2000px' }}
       >
         {itens.map((item, indice) => (
