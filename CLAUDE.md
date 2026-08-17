@@ -625,6 +625,33 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       apagá-la deixaria esses dois itens sem destino. Se a ideia for tirar
       a página de vez, é só remover a rota e as duas entradas de menu.
 
+21. ~~Alternador de tema vira uma chave (sol / interruptor / lua)~~ ✅
+    concluído (2026-08-17) — o botão único de sol-ou-lua virou um
+    controle de três partes: ícone do sol, interruptor no meio (ligado =
+    escuro) e ícone da lua, com o lado inativo esmaecido. Os três são
+    clicáveis. Duas diferenças em relação ao componente de referência:
+    - o `Switch` veio da **CLI do shadcn deste projeto**
+      (`npx shadcn add switch` → `components/ui/switch.tsx`), que gera a
+      versão sobre **Base UI**, e não os `@radix-ui/react-switch` +
+      `@radix-ui/react-label` do exemplo. O projeto inteiro é `@base-ui/react`
+      (`components.json` → `"style": "base-nova"`), então instalar o Radix
+      colocaria uma segunda biblioteca de primitivos pra fazer o que a de
+      casa já faz — mesma decisão do lucide-react x react-icons e do
+      motion x framer-motion. O `Label` nem era usado: o próprio exemplo
+      usa `<span>`. Nenhuma dependência nova foi instalada;
+    - os ícones são `<button>`, não `<span onClick>` como no exemplo. Um
+      `<span>` com clique não recebe foco nem responde ao teclado — quem
+      navega por Tab não conseguiria usar essa metade do controle.
+    - De quebra saiu um dos erros de lint antigos: o `montado` (guarda de
+      hidratação, porque o servidor não sabe o tema salvo no navegador)
+      era um `setState` dentro de `useEffect`; agora é
+      `useSyncExternalStore` com snapshot diferente no servidor e no
+      cliente, que faz a mesma coisa sem a renderização extra.
+    - Testado: começa certo com o sistema em claro e em escuro, os três
+      controles trocam o tema, a escolha sobrevive ao recarregar (o
+      interruptor nasce marcado, sem divergência de hidratação), funciona
+      pelo teclado (Espaço) e não estoura a barra do topo no celular.
+
 ## Convenções de código
 
 - Componentes em `/app` ou `/components`; acesso a dados via route handlers em `/app/api`
