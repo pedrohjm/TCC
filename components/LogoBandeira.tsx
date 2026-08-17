@@ -6,8 +6,9 @@ import { useImagemComFallback } from '@/hooks/use-imagem-com-fallback'
 const SRC = '/images/logo/Logo.png'
 
 // Formato "bandeira": um hexágono alongado (pontas em vez de cantos retos
-// nas duas laterais), no estilo do modelo em public/images/modelo/modelo.pdf
-// (o "TBH" do topo do site de referência). Duas camadas com o mesmo recorte,
+// nas duas laterais), no estilo do "TBH" do topo do site de referência de
+// então (o modelo.pdf que ficava em public/images/modelo/, hoje removido).
+// Duas camadas com o mesmo recorte,
 // uma um pouco maior por baixo (cor de acento = "menta" da paleta da loja),
 // criam o efeito de borda/moldura ao redor da bandeira em si (cor primária).
 const FORMA_BANDEIRA = 'polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%)'

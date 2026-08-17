@@ -183,7 +183,8 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
    consultar componentes/demos do shadcn durante o desenvolvimento do front.
 8. ~~Layout em "janela flutuante" sobre um fundo, a partir de um modelo em
    PDF~~ ✅ concluído (2026-08-07) — o usuário mandou um PDF de referência
-   (`public/images/modelo/modelo.pdf`, um wiki de RPG) mostrando o app
+   (`modelo.pdf`, um wiki de RPG — o arquivo foi removido de
+   `public/images/modelo/` depois, quando a home virou landing) mostrando o app
    inteiro (topo + menu + conteúdo) como uma janela arredondada e centralizada
    flutuando sobre um fundo decorativo, em vez de ocupar a tela toda.
    Reestruturado `app/layout.tsx`: `components/FundoPagina.tsx` é um fundo
@@ -553,6 +554,53 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       "Cardápio" da barra de baixo (mobile), então nenhuma página ficou
       inacessível.
 
+20. ~~Home vira landing page (hero + escolha de categoria + menu de seções
+    no topo)~~ ✅ concluído (2026-08-17) — a home (`/`) deixou de ser uma
+    página dentro da "janela" flutuante e virou uma **landing de largura
+    cheia**, no formato do modelo em `public/images/modelo/homepage.png`
+    (referência de estrutura: texugodasfigs.github.io/texugo-das-figs).
+    - **Dois grupos de rota** (`app/(landing)/` e `app/(janela)/`). Grupo
+      de rota não aparece na URL, então `/cardapio/picoles` continua sendo
+      `/cardapio/picoles` e o `proxy.ts` não precisou mudar. O
+      `app/layout.tsx` ficou só com o comum a tudo (fontes, tema, fundo);
+      o formato da página desceu pros dois layouts de grupo:
+      - `(landing)`: cabeçalho grudado no topo + `<main>` de largura cheia,
+        **quem rola é o documento**;
+      - `(janela)`: o quadro central de sempre (menu lateral + painel de
+        conteúdo), **quem rola é o painel interno** — por isso o
+        `h-svh overflow-hidden` saiu do `<body>` e desceu pra esse layout.
+        Todas as páginas internas continuam exatamente como estavam.
+    - `components/CabecalhoTopo.tsx` é o mesmo cabeçalho pros dois, com
+      props (`comNavSecoes`, `fixo`, `largura`) em vez de duas cópias.
+    - **Menu de navegação rápida** (`components/NavSecoes.tsx`,
+      seções em `lib/secoes-landing.ts`): âncoras pras 5 seções com o item
+      da seção atual destacado conforme rola. No celular ele não cabe ao
+      lado da logo, então vai pra uma segunda linha (`order-last w-full`)
+      que rola na horizontal. Os `scroll-mt-*` das seções compensam a
+      altura do cabeçalho fixo (conferido: no celular o cabeçalho ocupa
+      109px e as seções param em 112px, sem ficar escondidas atrás dele).
+    - **Bug pego no teste — destaque errado na última seção:** a primeira
+      versão usava `IntersectionObserver` com uma faixa no meio da tela.
+      Clicar em "Contato" levava até lá, mas o menu continuava marcando
+      "Sobre": a última seção nunca alcança o meio da janela, porque a
+      página acaba antes. Trocado por cálculo de posição (a seção ativa é
+      a última cujo topo passou de 40% da altura da janela) + um caso
+      explícito pro fim da página, onde a última seção é sempre a ativa.
+    - **Seção "Cardápio"** (`components/CardapioLanding.tsx`): chips das 5
+      categorias; a escolhida mostra os itens ali mesmo, sem trocar de
+      página. Reaproveita `FiltroCategoriaSabor` + `GradeSabores` da tela
+      `/cardapio/sabores-1800ml` em vez de duplicar. Só "Sabores 1800 ml"
+      tem dados de verdade (model `Sabor`); as outras quatro mostram o
+      estado "em breve" com um resumo da categoria.
+    - O resto da home antiga (Avisos, Sobre nós, Fale conosco) continua
+      igual, agora como seções da landing com seus `id`s. Os 5 cards de
+      atalho de categoria não voltaram — quem faz esse papel agora é a
+      seção Cardápio.
+    - No celular a landing mantém a barra flutuante de baixo
+      (`MenuMobile`), que é a navegação pro resto do site. Como ali ela não
+      passa mais pelo `AppSidebar` (que era quem decidia mobile x
+      desktop), o `md:hidden` foi pro wrapper no layout.
+
 ## Convenções de código
 
 - Componentes em `/app` ou `/components`; acesso a dados via route handlers em `/app/api`
@@ -565,12 +613,15 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 Etapas 1 a 5 e 7 a 11 do roadmap concluídas: CRUD completo de Venda, Produto
 e Reserva em `/app/api`, autenticação (Auth.js v5, credentials + JWT, login
 em `/login`), dashboard em `/dashboard` (Recharts + heatmap, restrito ao
-DONO), e o site (shadcn/ui) no layout do modelo de referência — topo isolado
-com a logo em banner, e abaixo dois painéis separados (menu + conteúdo) num
-quadro estreito e centralizado, com o fundo aparecendo em volta, dark mode
-de verdade (botão sol/lua) e página de editar perfil (`/perfil`, trocar
-nome/senha): `/` é a home pública (foto de topo + carrossel de avisos +
-atalhos das categorias), `/cardapio/<slug>` tem as 5
+DONO), dark mode de verdade (botão sol/lua) e página de editar perfil
+(`/perfil`, trocar nome/senha). O site tem **dois formatos de página**
+(grupos de rota, item 20 do roadmap): `/` é uma **landing pública de
+largura cheia** (hero + escolha de categoria + avisos + sobre + contato,
+com menu de seções na barra do topo), e as demais páginas ficam no
+formato de "janela" do modelo de referência — topo isolado com a logo em
+bandeira e, abaixo, dois painéis separados (menu + conteúdo) num quadro
+estreito e centralizado, com o fundo aparecendo em volta.
+`/cardapio/<slug>` tem as 5
 categorias — **Sabores 1800ml já implementada de verdade** (filtro por
 categoria + grade de cards, model `Sabor` novo no banco, `GET /api/sabores`
 público), as outras 4 (SelfService, Picolés, Acompanhamentos, Bebidas)
