@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { UserCog } from 'lucide-react'
+import { LayoutDashboard, ShoppingCart, UserCog } from 'lucide-react'
 import { auth, signOut } from '@/auth'
 import { LogoBandeira } from '@/components/LogoBandeira'
 import { NavSecoes } from '@/components/NavSecoes'
@@ -16,6 +16,10 @@ interface CabecalhoTopoProps {
   /** Mostra a navegação por seções (só faz sentido na landing, onde as
    *  seções existem na mesma página). */
   comNavSecoes?: boolean
+  /** Mostra os atalhos de "Registrar venda" e "Dashboard" pra quem está
+   *  logado. Serve pra landing, que não tem menu lateral — nas páginas
+   *  internas esses links já estão no menu, repetir só polui. */
+  comAtalhosEquipe?: boolean
   /** Na landing o cabeçalho acompanha a rolagem; nas outras páginas quem
    *  rola é o painel interno, então ele já fica fixo naturalmente. */
   fixo?: boolean
@@ -28,10 +32,12 @@ interface CabecalhoTopoProps {
 // a diferença entre as duas é só o menu de seções e a largura.
 export async function CabecalhoTopo({
   comNavSecoes = false,
+  comAtalhosEquipe = false,
   fixo = false,
   largura = 'quadro',
 }: CabecalhoTopoProps) {
   const sessao = await auth()
+  const papel = sessao?.user?.papel ?? null
 
   return (
     <header
@@ -71,6 +77,37 @@ export async function CabecalhoTopo({
               <span className="hidden text-sm text-muted-foreground lg:inline">
                 {sessao.user.name}
               </span>
+
+              {/* Atalhos de equipe. Sem isso, quem entra como atendente ou
+                  dono e cai na landing no computador não tem como chegar
+                  em "Registrar venda"/"Dashboard": esses links só existem
+                  no menu lateral (que a landing não tem) e na barra de
+                  baixo do celular (escondida a partir de md). */}
+              {comAtalhosEquipe && papel && (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  nativeButton={false}
+                  render={<Link href="/vendas" />}
+                  aria-label="Registrar venda"
+                  title="Registrar venda"
+                >
+                  <ShoppingCart />
+                </Button>
+              )}
+              {comAtalhosEquipe && papel === 'DONO' && (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  nativeButton={false}
+                  render={<Link href="/dashboard" />}
+                  aria-label="Dashboard"
+                  title="Dashboard"
+                >
+                  <LayoutDashboard />
+                </Button>
+              )}
+
               <Button
                 variant="ghost"
                 size="icon-sm"

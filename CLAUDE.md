@@ -600,6 +600,19 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       (`MenuMobile`), que é a navegação pro resto do site. Como ali ela não
       passa mais pelo `AppSidebar` (que era quem decidia mobile x
       desktop), o `md:hidden` foi pro wrapper no layout.
+    - **Regressão encontrada e corrigida logo depois (o usuário perguntou
+      "onde ficou o dashboard?"):** no computador, quem entrava como
+      atendente ou dono e ficava na landing não tinha *nenhum* caminho pra
+      "Registrar venda" e "Dashboard". Esses dois links existiam só em dois
+      lugares — o menu lateral (que a landing não tem) e a barra de baixo
+      do celular (escondida a partir de `md`) — então no desktop sobrava só
+      digitar a URL na mão. No celular e nas páginas internas continuava
+      funcionando, por isso não apareceu nos testes anteriores. Corrigido
+      com dois atalhos em ícone na barra do topo (`comAtalhosEquipe` no
+      `CabecalhoTopo`), só na landing: carrinho pra quem tem qualquer papel
+      e o painel só pro DONO. Conferido nos três casos (DONO vê os dois,
+      ATENDENTE só o carrinho, deslogado não vê nenhum) e que a barra não
+      estoura em nenhuma largura de 390px a 1440px.
 
 ## Convenções de código
 

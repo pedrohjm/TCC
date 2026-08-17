@@ -17,7 +17,7 @@ export default async function LayoutLanding({
 
   return (
     <div className="flex min-h-svh flex-col">
-      <CabecalhoTopo comNavSecoes fixo largura="landing" />
+      <CabecalhoTopo comNavSecoes comAtalhosEquipe fixo largura="landing" />
       {/* pb-28 no mobile: espaço pro MenuMobile (fixed bottom-4) não
           cobrir o fim da página. */}
       <main className="flex-1 pb-28 md:pb-0">{children}</main>
