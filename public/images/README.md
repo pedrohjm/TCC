@@ -28,6 +28,10 @@ em `/images/logo/logo.png`).
 - `banners/sobre.jpg` — foto da seção "Sobre nós" da home (equipe, loja
   por dentro, o que fizer sentido). Proporção 4:3. Sem o arquivo, cai no
   ícone de loja.
+- `banners/login.jpg` — foto da metade esquerda das telas de entrar e
+  criar conta (`/login` e `/registrar`). Ocupa a coluna inteira, então
+  prefira uma imagem "em pé" (mais alta que larga). Sem o arquivo, cai
+  num degradê com o ícone de sorvete.
 - `banners/` — imagens maiores (ex. banner da home), se um dia a home
   precisar de uma foto em vez do fundo colorido atual.
 

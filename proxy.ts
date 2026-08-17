@@ -41,10 +41,14 @@ export default auth((req) => {
 })
 
 export const config = {
+  // `login` e `registrar` ficam de fora porque são as telas de quem ainda
+  // não entrou — se o proxy as protegesse, elas redirecionariam pra si
+  // mesmas em loop.
+  //
   // O `.*\.` no fim exclui qualquer caminho com extensão de arquivo — ou
   // seja, os arquivos estáticos de /public (logo, imagem de fundo,
   // favicon...). Sem isso o proxy tratava /images/logo/Logo.png como uma
   // página protegida e respondia 302 pro /login, então a logo só carregava
   // pra quem já estivesse logado.
-  matcher: ['/((?!api|login|_next|.*\\.).*)'],
+  matcher: ['/((?!api|login|registrar|_next|.*\\.).*)'],
 }

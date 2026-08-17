@@ -652,6 +652,43 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       interruptor nasce marcado, sem divergência de hidratação), funciona
       pelo teclado (Espaço) e não estoura a barra do topo no celular.
 
+22. ~~Telas de entrar e criar conta em página inteira (foto à esquerda)~~
+    ✅ concluído (2026-08-17) — a tela de login antiga (que ficava dentro
+    da janela, com menu lateral e faixa de título) saiu. No lugar entrou
+    um **grupo de rota novo, `app/(auth)/`**, com duas páginas que ocupam
+    a janela do navegador inteira: `/login` e `/registrar`. As duas usam a
+    mesma moldura (`components/MolduraAuth.tsx`): foto na metade esquerda
+    e formulário na direita, no formato da imagem de referência. No
+    celular a foto sai (`lg:grid-cols-2`) e fica só o formulário.
+    - O lugar da foto é `public/images/banners/login.jpg`, com o mesmo
+      fallback do resto do site (`components/FotoAuth.tsx`).
+    - Campo de senha com o olhinho de mostrar/esconder
+      (`components/CamposAuth.tsx` — precisa ser client component por
+      causa do estado, por isso os campos não ficam direto na página, que
+      é server component pra poder usar server action no formulário).
+    - **Não entrou o "Login with Google" da referência:** o projeto só tem
+      login por e-mail e senha (`auth.ts`, provider Credentials). Um botão
+      que não faz nada seria pior do que não ter botão.
+    - **Cadastro (`/registrar`)**: valida com Zod
+      (`lib/validations/auth.ts`), recusa e-mail repetido, guarda a senha
+      com bcrypt e já entra com a conta recém-criada.
+      **O papel é fixo no código como `ATENDENTE`, nunca vem do
+      formulário** — se viesse, qualquer pessoa poderia se cadastrar como
+      DONO e abrir o faturamento da loja no `/dashboard`. Testado: uma
+      conta criada pela tela não vê o atalho do dashboard e é barrada pelo
+      `proxy.ts` ao tentar `/dashboard` na mão.
+      ⚠️ **Ainda assim o cadastro é aberto**: hoje qualquer visitante pode
+      criar uma conta de atendente e chegar no `/vendas`. Pra uso real
+      isso precisa ser fechado — as saídas naturais são exigir um código
+      de convite ou deixar só o DONO criar contas (uma tela de gestão de
+      usuários). Fica registrado aqui porque é decisão de produto, não de
+      código.
+    - `proxy.ts` ganhou `registrar` na lista de exclusões do matcher (do
+      lado de `login`): são as telas de quem ainda não entrou, se o proxy
+      as protegesse elas redirecionariam pra si mesmas em loop.
+    - `TituloPagina` perdeu as entradas `/` e `/login` — nenhuma das duas
+      passa mais pela faixa de título da janela.
+
 ## Convenções de código
 
 - Componentes em `/app` ou `/components`; acesso a dados via route handlers em `/app/api`
