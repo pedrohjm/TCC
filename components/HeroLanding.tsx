@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { motion } from 'motion/react'
 import { ArrowRight, BadgeCheck, MapPin, Store } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -74,12 +73,10 @@ export function HeroLanding() {
               Ver o cardápio
               <ArrowRight className="h-4 w-4" />
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              nativeButton={false}
-              render={<Link href="/estabelecimento" />}
-            >
+            {/* Âncora pra seção "Contato" da própria landing, que agora
+                começa pela localização — antes ia pra página
+                /estabelecimento. */}
+            <Button size="lg" variant="outline" nativeButton={false} render={<a href="#contato" />}>
               <MapPin className="h-4 w-4" />
               Como chegar
             </Button>

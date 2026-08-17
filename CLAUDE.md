@@ -613,6 +613,17 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       e o painel só pro DONO. Conferido nos três casos (DONO vê os dois,
       ATENDENTE só o carrinho, deslogado não vê nenhum) e que a barra não
       estoura em nenhuma largura de 390px a 1440px.
+    - **Localização subiu pro topo do "Contato"** (2026-08-17): o bloco da
+      localização (foto + "Confira nossa localização!" + endereço em
+      pílula + mapa interativo), que era o conteúdo da página
+      `/estabelecimento`, virou `components/BlocoLocalizacao.tsx` e agora
+      abre a seção "Contato" da landing, com o "Fale conosco" logo abaixo.
+      O botão "Como chegar" do hero deixou de ir pra `/estabelecimento` e
+      virou âncora `#contato`. **A página `/estabelecimento` continua
+      existindo** e usa o mesmo componente — é o destino do item
+      "Estabelecimento" do menu lateral e da barra do celular, então
+      apagá-la deixaria esses dois itens sem destino. Se a ideia for tirar
+      a página de vez, é só remover a rota e as duas entradas de menu.
 
 ## Convenções de código
 
