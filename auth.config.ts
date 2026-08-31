@@ -13,10 +13,11 @@ export const authConfig = {
       return !!auth?.user
     },
     // Só lê campos que já estão no JWT (id, papel) — nenhuma consulta ao
-    // banco aqui. Precisa estar neste arquivo (não só em auth.ts) porque
-    // proxy.ts instancia o NextAuth só com este config: sem isto, o
-    // `req.auth.user.papel` chegaria sempre undefined no proxy e o
-    // gate de "só DONO acessa /dashboard" bloquearia todo mundo.
+    // banco aqui. Fica neste arquivo (e não só em auth.ts) porque proxy.ts
+    // instancia o NextAuth com este config: assim os dois enxergam a
+    // sessão com o mesmo formato, com `papel` incluído. Hoje o proxy só
+    // pergunta se existe sessão, mas já precisou do papel — e a página que
+    // decide o que o atendente vê continua precisando.
     session({ session, token }) {
       session.user.id = token.id as string
       session.user.papel = token.papel as 'DONO' | 'ATENDENTE'

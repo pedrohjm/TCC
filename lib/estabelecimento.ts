@@ -1,6 +1,7 @@
-// Dados da página /estabelecimento ainda genéricos — troque aqui quando o
-// endereço e as coordenadas reais da loja forem definidos. As coordenadas
-// abaixo apontam pro centro de Brasília só como placeholder neutro.
+// Endereço e coordenadas da loja, mostrados na seção "Contato" da home
+// (components/BlocoLocalizacao.tsx). Ainda genéricos — troque aqui quando
+// os dados reais forem definidos. As coordenadas abaixo apontam pro
+// centro de Brasília só como placeholder neutro.
 export const ENDERECO_ESTABELECIMENTO = 'Rua Exemplo, 123 – Centro, Sua Cidade – UF'
 
 export const LOCALIZACAO_MAPA = {

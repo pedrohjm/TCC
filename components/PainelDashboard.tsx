@@ -264,8 +264,9 @@ export default function PainelDashboard() {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 p-4">
-      {/* O título "Dashboard" já vem da faixa no topo do painel
-          (components/TituloPagina.tsx), então aqui ficam só os controles. */}
+      {/* O nome da categoria já vem do cabeçalho do painel
+          (components/PainelGestao.tsx), então aqui ficam só os
+          controles de mês. */}
       <div className="flex flex-wrap items-center justify-end gap-2">
         <button
           type="button"

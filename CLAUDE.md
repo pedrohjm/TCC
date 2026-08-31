@@ -753,6 +753,56 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
     uma rota pra ligar/desligar a marcação, e a faixa vermelha em cima do
     item na `GradeSabores`.
 
+26. ~~Fim do formato de "janela": o sistema virou uma página só, com
+    categorias~~ ✅ concluído (2026-08-31) — a pedido do usuário, o
+    modelo antigo de página (barra do topo + menu lateral + painel de
+    conteúdo num quadro estreito) foi **apagado**. Ele existia pras
+    páginas de `/cardapio/<slug>`, e desde que a home virou landing
+    (item 20) os produtos aparecem todos lá — o menu lateral tinha
+    virado um caminho paralelo pro mesmo conteúdo.
+    - **`/painel` é a página nova**: uma só, no formato da landing
+      (largura cheia, quem rola é o documento), com as três telas da
+      equipe — Registrar venda, Falta no estoque e Dashboard — trocadas
+      por **botões de categoria**, do mesmo jeito que o cliente troca de
+      categoria no cardápio da home. `components/PainelGestao.tsx` monta
+      isso; as categorias ficam em `lib/secoes-painel.ts`.
+    - **A categoria fica na URL** (`/painel?secao=dashboard`), lida no
+      servidor (`app/(sistema)/painel/page.tsx`) e reescrita no clique com
+      `history.replaceState` — sem navegação. Assim o F5 e os atalhos da
+      barra do topo caem na categoria certa. `replace` e não `push` porque
+      trocar de aba não deveria encher o botão "voltar".
+    - **Só a categoria aberta é montada**, e o dashboard entra por
+      `next/dynamic`: como as três telas agora dividem a mesma rota,
+      importar direto faria o atendente baixar o Recharts — a parte mais
+      pesada do site — sem nunca poder abrir o gráfico.
+    - **A trava do dashboard mudou de lugar.** Ela era por caminho no
+      `proxy.ts` (`/dashboard` + papel ≠ DONO → redireciona), e caminho
+      não existe mais. Agora: a página só entrega a categoria do dashboard
+      pra quem é DONO (nem vai no HTML), e `GET /api/relatorios` continua
+      com `exigirDono()` — que é quem de fato protege os números. Testado
+      que o atendente não vê o botão, que forçar `?secao=dashboard` na mão
+      cai em "Registrar venda", e que a rota responde 403 pra ele.
+    - **Saíram** (`git log` guarda tudo): `app/(janela)/` inteiro — as 5
+      páginas de cardápio, `/estabelecimento`, `/vendas`, `/dashboard`,
+      `/estoque` —, `AppSidebar`, `TituloPagina`, `TelaSabores`,
+      `PaginaCardapioEmBreve`, o `sidebar` do shadcn e o que só ele usava
+      (`sheet`, `tooltip`, `skeleton`, `separator`, `input`,
+      `hooks/use-mobile`). `/perfil` continua existindo, agora no grupo
+      novo `app/(sistema)/`.
+    - **Quem apontava pras páginas apagadas foi remendado**: os avisos da
+      home (`lib/avisos.ts`) e o menu do celular passaram a apontar pras
+      seções da própria home (`/#cardapio`, `/#contato`); o botão "Abrir
+      página de …" no fim do cardápio saiu; o `CabecalhoTopo` perdeu as
+      props `fixo`/`largura` (não há mais dois formatos) e seus atalhos
+      levam pra `/painel?secao=…`.
+    - **Aproveitando:** a tela de registrar venda foi convertida pros
+      tokens do tema, o mesmo que o dashboard passou no item 24. Ela ainda
+      era do tempo anterior ao tema (`bg-white`, `text-gray-600`,
+      `bg-gray-900` no botão) e, no escuro, o texto do carrinho ficava
+      cinza-escuro sobre fundo escuro — praticamente invisível. Isso não
+      incomodava tanto quando era uma página separada; virando aba
+      vizinha de um dashboard já convertido, ficava gritante.
+
 ## Convenções de código
 
 - Componentes em `/app` ou `/components`; acesso a dados via route handlers em `/app/api`
@@ -764,26 +814,26 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
 
 Etapas 1 a 5 e 7 a 11 do roadmap concluídas: CRUD completo de Venda, Produto
 e Reserva em `/app/api`, autenticação (Auth.js v5, credentials + JWT, login
-em `/login`), dashboard em `/dashboard` (Recharts + heatmap, restrito ao
-DONO), dark mode de verdade (botão sol/lua) e página de editar perfil
-(`/perfil`, trocar nome/senha). O site tem **dois formatos de página**
-(grupos de rota, item 20 do roadmap): `/` é uma **landing pública de
-largura cheia** (hero + escolha de categoria + avisos + sobre + contato,
-com menu de seções na barra do topo), e as demais páginas ficam no
-formato de "janela" do modelo de referência — topo isolado com a logo em
-bandeira e, abaixo, dois painéis separados (menu + conteúdo) num quadro
-estreito e centralizado, com o fundo aparecendo em volta.
-`/cardapio/<slug>` tem as 5
-categorias — **Sabores 1800ml já implementada de verdade** (filtro por
-categoria + grade de cards, model `Sabor` novo no banco, `GET /api/sabores`
-público), as outras 4 (SelfService, Picolés, Acompanhamentos, Bebidas)
-ainda "em breve", `/estabelecimento` também já implementada de verdade
-(foto + endereço + mapa interativo — endereço/coordenadas ainda genéricos,
-ver `lib/estabelecimento.ts`),
-`/vendas` tem a tela de registro de vendas (funcional, sem design refinado —
-só ganhou a sidebar/tema do shadcn ao redor). Páginas protegidas por
-`proxy.ts` (exceto `/`, `/cardapio/*` e os arquivos estáticos de `/public`,
-que são públicos). Login de teste:
+em `/login`), dashboard (Recharts + heatmap, restrito ao DONO), dark mode
+de verdade e página de editar perfil (`/perfil`, trocar nome/senha).
+
+O site tem **duas páginas de verdade** (item 26 do roadmap), as duas de
+largura cheia com o documento rolando:
+
+- **`/`** — a visão do cliente, pública: hero, cardápio por categoria,
+  avisos, sobre e contato (localização + redes), com menu de seções na
+  barra do topo. É o único lugar onde os produtos aparecem. Só a
+  categoria **Sabores 1800 ml** tem dados de verdade (filtro + grade,
+  model `Sabor`, `GET /api/sabores` público); as outras 4 (SelfService,
+  Picolés, Acompanhamentos, Bebidas) mostram "em breve". O endereço e as
+  coordenadas do mapa ainda são genéricos (`lib/estabelecimento.ts`).
+- **`/painel`** — a visão da equipe, atrás de login: Registrar venda,
+  Falta no estoque ("em breve") e Dashboard (só DONO), trocadas por
+  categoria dentro da mesma página.
+
+Fora delas, só `/perfil`, `/login` e `/registrar`. Tudo que não é `/` (nem
+arquivo estático de `/public`) exige sessão, pelo `proxy.ts`. Login de
+teste:
 `ana@sorveteria.com` (DONO) / `joao@sorveteria.com` (ATENDENTE), senha
 `123456` (gerada pelo `prisma/seed.ts` — nunca usar essa senha fora de dev
 local). A etapa 6

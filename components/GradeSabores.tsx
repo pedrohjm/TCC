@@ -23,7 +23,7 @@ interface GradeSaboresProps {
 
 // Foto com fallback: se o arquivo em public/images/cardapio/ ainda não
 // existir (nenhuma foto real foi tirada ainda), cai no ícone da categoria
-// — mesma ideia usada na logo (components/AppSidebar.tsx). className/
+// — mesma ideia usada nas outras imagens do site (hooks/use-imagem-com-fallback). className/
 // tamanhoIcone permitem reaproveitar isso tanto no cartão (foto grande,
 // quadrada) quanto na miniatura ao lado do nome no preview do hover.
 function FotoSabor({

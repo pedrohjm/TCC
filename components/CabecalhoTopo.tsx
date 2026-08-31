@@ -5,7 +5,6 @@ import { LogoBandeira } from '@/components/LogoBandeira'
 import { NavSecoes } from '@/components/NavSecoes'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 async function sair() {
   'use server'
@@ -13,48 +12,24 @@ async function sair() {
 }
 
 interface CabecalhoTopoProps {
-  /** Mostra a navegação por seções (só faz sentido na landing, onde as
-   *  seções existem na mesma página). */
+  /** Mostra a navegação por seções. Só faz sentido na home: lá os links
+   *  são âncoras de seções da própria página. */
   comNavSecoes?: boolean
-  /** Mostra os atalhos de "Registrar venda" e "Dashboard" pra quem está
-   *  logado. Serve pra landing, que não tem menu lateral — nas páginas
-   *  internas esses links já estão no menu, repetir só polui. */
-  comAtalhosEquipe?: boolean
-  /** Na landing o cabeçalho acompanha a rolagem; nas outras páginas quem
-   *  rola é o painel interno, então ele já fica fixo naturalmente. */
-  fixo?: boolean
-  /** Largura do conteúdo: o quadro estreito das páginas internas ou a
-   *  largura maior da landing. */
-  largura?: 'quadro' | 'landing'
 }
 
-// Barra do topo, compartilhada pela landing e pelas páginas internas —
-// a diferença entre as duas é só o menu de seções e a largura.
-export async function CabecalhoTopo({
-  comNavSecoes = false,
-  comAtalhosEquipe = false,
-  fixo = false,
-  largura = 'quadro',
-}: CabecalhoTopoProps) {
+// Barra do topo, a mesma na home e no painel da equipe. Fica grudada no
+// topo nas duas (quem rola é o documento, não um painel interno como no
+// formato antigo de janela).
+export async function CabecalhoTopo({ comNavSecoes = false }: CabecalhoTopoProps) {
   const sessao = await auth()
   const papel = sessao?.user?.papel ?? null
 
   return (
-    <header
-      className={cn(
-        'z-40 border-b border-black/10 bg-sidebar/90 backdrop-blur-sm dark:border-white/10',
-        fixo ? 'sticky top-0' : 'shrink-0'
-      )}
-    >
+    <header className="sticky top-0 z-40 border-b border-black/10 bg-sidebar/90 backdrop-blur-sm dark:border-white/10">
       {/* Mesmo max-w + px-4 do conteúdo abaixo, pra a logo alinhar com a
           borda esquerda do que vem embaixo em vez de ficar colada na
           borda da janela do navegador. */}
-      <div
-        className={cn(
-          'mx-auto flex w-full flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2',
-          largura === 'landing' ? 'max-w-6xl' : 'max-w-[1080px]'
-        )}
-      >
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2">
         <Link href="/" className="flex shrink-0 items-center py-1" aria-label="Q10 Sorvetes">
           <LogoBandeira />
         </Link>
@@ -78,29 +53,28 @@ export async function CabecalhoTopo({
                 {sessao.user.name}
               </span>
 
-              {/* Atalhos de equipe. Sem isso, quem entra como atendente ou
-                  dono e cai na landing no computador não tem como chegar
-                  em "Registrar venda"/"Dashboard": esses links só existem
-                  no menu lateral (que a landing não tem) e na barra de
-                  baixo do celular (escondida a partir de md). */}
-              {comAtalhosEquipe && papel && (
+              {/* Atalhos de equipe: levam direto pra categoria certa do
+                  painel. Sem eles, quem entra e cai na home no computador
+                  não teria como chegar no sistema — a barra de baixo do
+                  celular some a partir de md. */}
+              {papel && (
                 <Button
                   variant="ghost"
                   size="icon-sm"
                   nativeButton={false}
-                  render={<Link href="/vendas" />}
+                  render={<Link href="/painel?secao=vendas" />}
                   aria-label="Registrar venda"
                   title="Registrar venda"
                 >
                   <ShoppingCart />
                 </Button>
               )}
-              {comAtalhosEquipe && papel === 'DONO' && (
+              {papel === 'DONO' && (
                 <Button
                   variant="ghost"
                   size="icon-sm"
                   nativeButton={false}
-                  render={<Link href="/dashboard" />}
+                  render={<Link href="/painel?secao=dashboard" />}
                   aria-label="Dashboard"
                   title="Dashboard"
                 >

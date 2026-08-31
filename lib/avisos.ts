@@ -6,7 +6,9 @@ export interface Aviso {
   icone: LucideIcon
   /** Etiqueta curta no topo do card (ex.: "Novidade"). */
   rotulo?: string
-  /** Se existir, o card vira link e ganha o "Ver mais". */
+  /** Se existir, o card vira link e ganha o "Ver mais". Hoje aponta pra
+   *  seção do cardápio da própria home — as páginas por categoria não
+   *  existem mais. */
   href?: string
 }
 
@@ -22,7 +24,7 @@ export const AVISOS: Aviso[] = [
       'Confira os sabores que estão disponíveis agora no estoque da loja, separados por doce, fruta e azedo.',
     icone: Sparkles,
     rotulo: 'Novidade',
-    href: '/cardapio/sabores-1800ml',
+    href: '/#cardapio',
   },
   {
     titulo: 'Self-service todos os dias',
@@ -30,7 +32,7 @@ export const AVISOS: Aviso[] = [
       'Monte seu pote do jeito que quiser e pague por peso. Os sabores do dia ficam na tela de SelfService.',
     icone: IceCream2,
     rotulo: 'Todo dia',
-    href: '/cardapio/selfservice',
+    href: '/#cardapio',
   },
   {
     titulo: 'Horário de funcionamento',

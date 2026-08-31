@@ -11,10 +11,10 @@ import { ENDERECO_ESTABELECIMENTO } from '@/lib/estabelecimento'
 // social. Endereço e coordenadas ainda são genéricos, ver
 // lib/estabelecimento.ts.
 //
-// Vive em dois lugares: no topo da seção "Contato" da landing (é pra lá
-// que o botão "Como chegar" do hero leva) e na página /estabelecimento,
-// que continua existindo e é o destino do item "Estabelecimento" do menu.
-// Por isso virou componente, em vez de o markup ficar só na página.
+// Fica no topo da seção "Contato" da home — é pra lá que aponta o botão
+// "Como chegar" do hero e o item "Onde estamos" do menu do celular. Já
+// teve uma página só dela (/estabelecimento); quando a home virou landing
+// o conteúdo veio pra cá e a página saiu.
 export function BlocoLocalizacao() {
   return (
     <Card className="mx-auto w-full max-w-2xl gap-0 overflow-hidden py-0">

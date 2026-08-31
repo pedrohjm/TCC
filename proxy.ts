@@ -11,10 +11,11 @@ import { authConfig } from './auth.config'
 // login completo, só de saber se já existe uma sessão.
 const { auth } = NextAuth(authConfig)
 
-// "/", "/cardapio/*" e "/estabelecimento" são a visão do cliente — pública,
-// sem login, pra poder ser aberta num tablet da loja ou no celular do
-// cliente.
-const CAMINHOS_PUBLICOS = ['/', '/cardapio', '/estabelecimento']
+// "/" é a visão do cliente — pública, sem login, pra poder ser aberta num
+// tablet da loja ou no celular do cliente. Cardápio e localização ficam
+// nela, em seções da própria página; as páginas separadas que existiam
+// pra isso (/cardapio/<slug>, /estabelecimento) foram removidas.
+const CAMINHOS_PUBLICOS = ['/']
 
 function ehCaminhoPublico(pathname: string) {
   return CAMINHOS_PUBLICOS.some(
@@ -33,11 +34,14 @@ export default auth((req) => {
     return Response.redirect(new URL('/login', req.nextUrl.origin))
   }
 
-  // Dashboard e relatórios são visão de dono do negócio — o atendente não
-  // precisa (nem deve) ver faturamento consolidado da loja.
-  if (pathname.startsWith('/dashboard') && req.auth.user.papel !== 'DONO') {
-    return Response.redirect(new URL('/', req.nextUrl.origin))
-  }
+  // Faturamento consolidado é visão de dono do negócio, não de atendente.
+  // Isso não dá mais pra checar por caminho: o dashboard virou uma
+  // categoria dentro de /painel, e não uma rota própria. A trava mudou de
+  // lugar, em dois pontos:
+  //   - app/(sistema)/painel/page.tsx só entrega a categoria do dashboard
+  //     pra quem é DONO (lib/secoes-painel.ts decide);
+  //   - GET /api/relatorios chama `exigirDono()`, que é quem de fato
+  //     protege os números — a tela sumir é conveniência, não segurança.
 })
 
 export const config = {

@@ -37,7 +37,7 @@ async function criarConta(formData: FormData) {
       // Papel fixo no código, nunca vindo do formulário: quem se cadastra
       // sozinho entra como ATENDENTE. Se o papel viesse do formulário,
       // qualquer pessoa poderia se cadastrar como DONO e abrir o
-      // faturamento da loja no /dashboard.
+      // faturamento da loja no dashboard.
       papel: 'ATENDENTE',
     },
   })

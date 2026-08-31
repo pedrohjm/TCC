@@ -159,17 +159,20 @@ export default function TelaRegistroVendas() {
     return () => window.removeEventListener('keydown', aoTeclar)
   }, [produtos, adicionarAoCarrinho, finalizarVenda, limparCarrinho])
 
-  // O título "Registrar venda" já vem da faixa no topo do painel
-  // (components/TituloPagina.tsx).
+  // O nome da categoria já vem do cabeçalho do painel
+  // (components/PainelGestao.tsx).
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 p-4">
       <section>
-        <h2 className="mb-2 text-sm font-medium text-gray-600">
-          Produtos <span className="font-normal text-gray-400">(clique ou tecle o número)</span>
+        <h2 className="mb-2 text-sm font-medium text-muted-foreground">
+          Produtos{' '}
+          <span className="font-normal text-muted-foreground/70">(clique ou tecle o número)</span>
         </h2>
 
-        {carregandoProdutos && <p className="text-sm text-gray-500">Carregando produtos…</p>}
-        {erroProdutos && <p className="text-sm text-red-600">{erroProdutos}</p>}
+        {carregandoProdutos && (
+          <p className="text-sm text-muted-foreground">Carregando produtos…</p>
+        )}
+        {erroProdutos && <p className="text-sm text-destructive">{erroProdutos}</p>}
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
           {produtos.map((produto, indice) => (
@@ -177,34 +180,42 @@ export default function TelaRegistroVendas() {
               key={produto.id}
               type="button"
               onClick={() => adicionarAoCarrinho(produto)}
-              className="flex flex-col items-start rounded border border-gray-300 bg-white p-3 text-left hover:border-gray-900 hover:bg-gray-50"
+              className="flex flex-col items-start rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-primary/60 hover:bg-accent/40"
             >
-              <span className="text-xs text-gray-400">{indice < 9 ? indice + 1 : ''}</span>
-              <span className="font-medium text-gray-900">{produto.nome}</span>
-              <span className="text-sm text-gray-600">{formatarMoeda(Number(produto.preco))}</span>
+              <span className="text-xs text-muted-foreground/70">
+                {indice < 9 ? indice + 1 : ''}
+              </span>
+              <span className="font-medium text-foreground">{produto.nome}</span>
+              <span className="text-sm text-muted-foreground">
+                {formatarMoeda(Number(produto.preco))}
+              </span>
             </button>
           ))}
         </div>
       </section>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-gray-600">Carrinho</h2>
+        <h2 className="mb-2 text-sm font-medium text-muted-foreground">Carrinho</h2>
 
         {carrinho.length === 0 ? (
-          <p className="text-sm text-gray-400">Nenhum item ainda — clique em um produto acima.</p>
+          <p className="text-sm text-muted-foreground/70">
+            Nenhum item ainda — clique em um produto acima.
+          </p>
         ) : (
-          <ul className="divide-y divide-gray-200 rounded border border-gray-200">
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card">
             {carrinho.map((item) => (
               <li key={item.produtoId} className="flex items-center justify-between px-3 py-2">
-                <span className="text-sm text-gray-900">
+                <span className="text-sm text-foreground">
                   {item.quantidade}× {item.nome}
                 </span>
                 <span className="flex items-center gap-3">
-                  <span className="text-sm text-gray-600">{formatarMoeda(item.preco * item.quantidade)}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {formatarMoeda(item.preco * item.quantidade)}
+                  </span>
                   <button
                     type="button"
                     onClick={() => removerUmDoCarrinho(item.produtoId)}
-                    className="text-gray-400 hover:text-gray-900"
+                    className="text-muted-foreground transition-colors hover:text-foreground"
                     aria-label={`Remover uma unidade de ${item.nome}`}
                   >
                     −
@@ -212,7 +223,7 @@ export default function TelaRegistroVendas() {
                   <button
                     type="button"
                     onClick={() => removerItem(item.produtoId)}
-                    className="text-gray-400 hover:text-red-600"
+                    className="text-muted-foreground transition-colors hover:text-destructive"
                     aria-label={`Remover ${item.nome} do carrinho`}
                   >
                     ✕
@@ -223,23 +234,26 @@ export default function TelaRegistroVendas() {
           </ul>
         )}
 
-        <p className="mt-2 text-right text-lg font-semibold text-gray-900">Total: {formatarMoeda(total)}</p>
+        <p className="mt-2 text-right text-lg font-semibold text-foreground">
+          Total: {formatarMoeda(total)}
+        </p>
       </section>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-gray-600">
-          Forma de pagamento <span className="font-normal text-gray-400">(ou tecle D/C/P)</span>
+        <h2 className="mb-2 text-sm font-medium text-muted-foreground">
+          Forma de pagamento{' '}
+          <span className="font-normal text-muted-foreground/70">(ou tecle D/C/P)</span>
         </h2>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {FORMAS_PAGAMENTO.map((forma) => (
             <button
               key={forma.valor}
               type="button"
               onClick={() => setFormaPagamento(forma.valor)}
-              className={`rounded border px-4 py-2 text-sm font-medium ${
+              className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
                 formaPagamento === forma.valor
-                  ? 'border-gray-900 bg-gray-900 text-white'
-                  : 'border-gray-300 bg-white text-gray-700 hover:border-gray-900'
+                  ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                  : 'border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground'
               }`}
             >
               {forma.rotulo} ({forma.tecla})
@@ -248,22 +262,28 @@ export default function TelaRegistroVendas() {
         </div>
       </section>
 
-      {erroEnvio && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{erroEnvio}</p>}
-      {sucesso && <p className="rounded bg-green-50 px-3 py-2 text-sm text-green-700">{sucesso}</p>}
+      {erroEnvio && (
+        <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{erroEnvio}</p>
+      )}
+      {sucesso && (
+        <p className="rounded-lg bg-secondary px-3 py-2 text-sm text-secondary-foreground">
+          {sucesso}
+        </p>
+      )}
 
       <div className="flex gap-2">
         <button
           type="button"
           onClick={finalizarVenda}
           disabled={!podeFinalizar}
-          className="flex-1 rounded bg-gray-900 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
+          className="flex-1 rounded-lg bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
         >
           {enviando ? 'Registrando…' : 'Finalizar venda (Enter)'}
         </button>
         <button
           type="button"
           onClick={limparCarrinho}
-          className="rounded border border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-gray-900"
+          className="rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
         >
           Limpar (Esc)
         </button>

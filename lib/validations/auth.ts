@@ -5,7 +5,7 @@ import { z } from 'zod'
 // ATENÇÃO — o papel NÃO vem daqui: quem se cadastra sai sempre como
 // ATENDENTE (ver a action em app/(auth)/registrar/page.tsx). Deixar o
 // papel vir do formulário permitiria qualquer um se cadastrar como DONO e
-// abrir o faturamento da loja no /dashboard.
+// abrir o faturamento da loja no dashboard.
 export const registrarSchema = z
   .object({
     nome: z.string().trim().min(1, 'Informe seu nome'),

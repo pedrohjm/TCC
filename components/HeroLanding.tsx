@@ -71,9 +71,8 @@ export function HeroLanding() {
               Ver o cardápio
               <ArrowRight className="h-4 w-4" />
             </Button>
-            {/* Âncora pra seção "Contato" da própria landing, que agora
-                começa pela localização — antes ia pra página
-                /estabelecimento. */}
+            {/* Âncora pra seção "Contato" da própria página, que começa
+                pela localização. */}
             <Button size="lg" variant="outline" nativeButton={false} render={<a href="#contato" />}>
               <MapPin className="h-4 w-4" />
               Como chegar

@@ -20,16 +20,16 @@ export const metadata: Metadata = {
 };
 
 // Layout raiz: só o que é comum a tudo (fontes, tema, fundo). O formato
-// da página em si fica nos dois grupos de rota:
+// da página em si fica nos grupos de rota, todos de largura cheia com o
+// documento rolando:
 //
-// - app/(landing)/  → a home, uma landing de largura cheia que rola
-//   normalmente (o documento rola);
-// - app/(janela)/   → as demais páginas, no formato de "janela" flutuante
-//   (menu lateral + painel de conteúdo num quadro central, altura fixa e
-//   rolagem interna).
+// - app/(landing)/  → a home, a visão do cliente, com menu de seções na
+//   barra do topo;
+// - app/(sistema)/  → o painel da equipe (/painel) e o editar perfil;
+// - app/(auth)/     → entrar e criar conta, que ocupam a tela inteira.
 //
-// Grupos de rota não aparecem na URL, então "/cardapio/picoles" continua
-// sendo "/cardapio/picoles" — o proxy.ts não precisou mudar.
+// Grupos de rota não aparecem na URL, então "/painel" é só "/painel" — o
+// proxy.ts não precisa saber que grupos existem.
 export default function RootLayout({
   children,
 }: Readonly<{

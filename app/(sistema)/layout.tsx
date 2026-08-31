@@ -2,11 +2,14 @@ import { auth } from '@/auth'
 import { CabecalhoTopo } from '@/components/CabecalhoTopo'
 import { MenuMobile } from '@/components/MenuMobile'
 
-// Home: landing de largura cheia, com rolagem normal do documento. A
-// única diferença pro layout do painel da equipe (app/(sistema)/) é o
-// menu de seções da barra do topo, que só existe aqui — ali os links são
-// âncoras das seções desta página (ver components/NavSecoes.tsx).
-export default async function LayoutLanding({
+// Páginas de quem trabalha na loja (`/painel` e `/perfil`). Mesmo formato
+// da landing — largura cheia, quem rola é o documento —, sem o menu de
+// seções da barra do topo, que só existe na home (lá os links são âncoras
+// da própria página).
+//
+// Substitui o antigo `app/(janela)/`, o formato de janela flutuante com
+// menu lateral.
+export default async function LayoutSistema({
   children,
 }: Readonly<{
   children: React.ReactNode
@@ -15,7 +18,7 @@ export default async function LayoutLanding({
 
   return (
     <div className="flex min-h-svh flex-col">
-      <CabecalhoTopo comNavSecoes />
+      <CabecalhoTopo />
       {/* pb-28 no mobile: espaço pro MenuMobile (fixed bottom-4) não
           cobrir o fim da página. */}
       <main className="flex-1 pb-28 md:pb-0">{children}</main>

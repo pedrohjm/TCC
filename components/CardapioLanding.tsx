@@ -2,10 +2,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { FiltroCategoriaSabor } from '@/components/FiltroCategoriaSabor'
 import { GradeSabores, type Sabor } from '@/components/GradeSabores'
@@ -18,9 +15,9 @@ import { cn } from '@/lib/utils'
 const SLUG_COM_DADOS = 'sabores-1800ml'
 
 // Seção "Cardápio" da landing: o cliente escolhe a categoria nos chips e
-// vê os itens dela ali mesmo, sem trocar de página. Reaproveita o filtro
-// e a grade que já existiam na tela /cardapio/sabores-1800ml em vez de
-// duplicar — as duas telas mostram a mesma coisa.
+// vê os itens dela ali mesmo, sem trocar de página. É o único lugar do
+// site onde os produtos aparecem — as páginas `/cardapio/<slug>`, que
+// mostravam a mesma coisa uma categoria por vez, foram removidas.
 export function CardapioLanding() {
   const [slugAtivo, setSlugAtivo] = useState(SLUG_COM_DADOS)
   const [categoriaSabor, setCategoriaSabor] = useState<CategoriaSaborValor | null>(null)
@@ -90,23 +87,12 @@ export function CardapioLanding() {
 
       {temDados ? (
         <div className="flex flex-col gap-4">
-          {/* Sub-filtro por sabor (Doce/Fruta/Azedo) — o mesmo componente
-              da tela de sabores. */}
+          {/* Sub-filtro por sabor (Doce/Fruta/Azedo) */}
           <FiltroCategoriaSabor
             categoriaAtiva={categoriaSabor}
             aoSelecionar={setCategoriaSabor}
           />
           <GradeSabores sabores={sabores} carregando={carregando} erro={erro} />
-          <div className="flex justify-center">
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link href={`/cardapio/${slugAtivo}`} />}
-            >
-              Abrir página de {itemAtivo.titulo}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
         </div>
       ) : (
         <Card>

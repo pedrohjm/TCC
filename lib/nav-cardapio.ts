@@ -7,10 +7,10 @@ export interface ItemCardapio {
   icone: LucideIcon
 }
 
-// Cada item aqui vira, ao mesmo tempo, uma entrada no menu lateral e um card
-// na home pública — a lista de sabores/produtos de cada categoria ainda não
-// existe (fica pra quando essas telas forem implementadas), por enquanto é
-// só a navegação + uma página "em breve".
+// As categorias do cardápio do cliente. Viram os botões da seção
+// "Cardápio" da home (components/CardapioLanding.tsx), que é onde os
+// produtos aparecem. Só "Sabores 1800 ml" tem dados de verdade no banco;
+// as outras quatro ainda mostram um card "em breve".
 export const ITENS_CARDAPIO: ItemCardapio[] = [
   {
     slug: 'sabores-1800ml',
