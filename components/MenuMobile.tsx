@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { Home, LayoutDashboard, ShoppingCart, Store, UtensilsCrossed } from 'lucide-react'
+import { Home, LayoutDashboard, PackageX, ShoppingCart, Store, UtensilsCrossed } from 'lucide-react'
 import { GradientMenu, type GradientMenuItem } from '@/components/ui/gradient-menu'
 import { ITENS_CARDAPIO } from '@/lib/nav-cardapio'
 
@@ -75,6 +75,14 @@ export function MenuMobile({ papel }: MenuMobileProps) {
             gradienteDe: '#7dd3fc',
             gradienteAte: '#0ea5e9',
             ativo: pathname === '/vendas',
+          },
+          {
+            titulo: 'Estoque',
+            icone: PackageX,
+            href: '/estoque',
+            gradienteDe: '#fca5a5',
+            gradienteAte: '#ef4444',
+            ativo: pathname === '/estoque',
           },
         ]
       : []),

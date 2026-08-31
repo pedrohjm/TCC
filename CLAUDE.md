@@ -703,6 +703,56 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
     `useTransform`, que só existiam por causa dela. Se um dia existirem os
     números reais, o histórico do git tem o componente pronto.
 
+24. ~~Dashboard repaginado (faturamento por mês/semana/dia) + lugar da
+    página de falta no estoque~~ ✅ concluído (2026-08-31) — o dashboard
+    foi reescrito no formato do modelo mandado pelo usuário (grade densa
+    de cartões: indicadores em cima, gráfico grande no meio, gráficos
+    menores embaixo), mas com as cores do tema da loja.
+    - **Cores agora vêm dos tokens.** O painel antigo tinha `text-gray-500`,
+      `border-gray-200`, `#111827` nas barras e `bg-red-50` nos erros —
+      ele é anterior ao tema e nunca tinha sido convertido, então ficava
+      cinza-azulado no modo escuro. Agora usa `bg-card`, `text-muted-
+      foreground`, `--chart-1..5` etc. O Recharts aceita `var(--chart-1)`
+      direto porque o valor vai parar num atributo SVG.
+    - **Faturamento com três recortes** (o pedido central), num único
+      gráfico com botões Por mês / Por semana / Por dia:
+      - *dia* e *semana* saem do mês selecionado. A semana é identificada
+        pela data da sua **segunda-feira** (`chaveSemana` em
+        `lib/relatorios.ts`) — segunda e não domingo porque é como o
+        comércio fecha a semana; o rótulo "04/08 a 10/08" é montado na
+        tela;
+      - *mês* é a única série que **olha além do mês selecionado**: são os
+        últimos 12 meses, pra dar comparação. Como isso não cabia na
+        consulta do mês, virou uma segunda consulta na rota
+        (`app/api/relatorios/route.ts`), trazendo só data e valor. Meses
+        sem venda entram com **zero** em vez de sumirem — senão o gráfico
+        daria a impressão de um período mais curto do que foi.
+    - Os outros itens pedidos (total de vendas, forma de pagamento,
+      produtos mais vendidos) já existiam no `calcularRelatorio`; só
+      mudaram de forma: rosca com legenda escrita à mão (o `Legend` do
+      Recharts não mostra valor nem percentual) e barras horizontais.
+    - **Ajuste depois do primeiro teste:** a legenda da rosca estava ao
+      lado dela e o valor em reais saía cortado no meio ("R$ 31,0…") — o
+      cartão tem ~330px dentro do quadro central e não sobrava largura.
+      Passou pra baixo da rosca.
+    - Continuam no painel, agora com as cores do tema: ticket médio,
+      % de vendas com reserva, heatmap dia × hora e a lista de vendas do
+      mês (essa ganhou rolagem interna, `max-h-80` — solta, ela empurrava
+      o resto do painel pra longe).
+25. **Falta no estoque — só o lugar da página** (2026-08-31) — o usuário
+    pediu a página dizendo que ela "irá ser adicionada posteriormente",
+    então por ora é só o lugar dela, como foi feito com Estabelecimento no
+    item 14: `app/(janela)/estoque/page.tsx` com um cartão "Em breve", mais
+    a entrada no menu lateral e na barra do celular.
+    Fica em **"Operação"** (qualquer papel logado), não em "Gestão": quem
+    vê o sabor acabar é quem está no balcão. Testado que o ATENDENTE entra
+    em `/estoque` e continua barrado no `/dashboard`.
+    O que falta, quando for implementar: um campo tipo
+    `emFalta Boolean @default(false)` no model `Sabor` (e depois nos
+    outros produtos, quando as demais categorias saírem do "em breve"),
+    uma rota pra ligar/desligar a marcação, e a faixa vermelha em cima do
+    item na `GradeSabores`.
+
 ## Convenções de código
 
 - Componentes em `/app` ou `/components`; acesso a dados via route handlers em `/app/api`

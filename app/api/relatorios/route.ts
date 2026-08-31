@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { exigirSessao, exigirDono } from '@/lib/auth-helpers'
-import { calcularRelatorio, limitesDoMes } from '@/lib/relatorios'
+import { agruparPorMes, calcularRelatorio, limitesDoMes, ultimosMeses } from '@/lib/relatorios'
+
+// Quantos meses a série "por mês" do dashboard mostra, terminando no mês
+// selecionado.
+const MESES_NA_SERIE = 12
 
 export async function GET(request: NextRequest) {
   const { sessao, erro: erroSessao } = await exigirSessao()
@@ -35,5 +39,16 @@ export async function GET(request: NextRequest) {
   const relatorio = calcularRelatorio(vendas)
   const mes = `${ano}-${String(mesIndex0 + 1).padStart(2, '0')}`
 
-  return NextResponse.json({ mes, ...relatorio })
+  // Série mês a mês: consulta à parte porque, ao contrário do resto do
+  // relatório, ela olha pra trás além do mês selecionado. Só traz data e
+  // valor (sem os itens), que é tudo que a soma por mês precisa.
+  const meses = ultimosMeses(ano, mesIndex0, MESES_NA_SERIE)
+  const inicioSerie = limitesDoMes(ano, mesIndex0 - (MESES_NA_SERIE - 1)).inicio
+  const vendasDaSerie = await prisma.venda.findMany({
+    where: { dataHora: { gte: inicioSerie, lt: fim } },
+    select: { dataHora: true, valorTotal: true },
+  })
+  const porMes = agruparPorMes(vendasDaSerie, meses)
+
+  return NextResponse.json({ mes, ...relatorio, porMes })
 }

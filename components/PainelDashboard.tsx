@@ -1,18 +1,23 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
 import { useEffect, useState } from 'react'
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts'
+import { CalendarDays, ChevronLeft, ChevronRight, Receipt, TrendingUp, Wallet } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface Relatorio {
   mes: string
@@ -21,6 +26,8 @@ interface Relatorio {
   ticketMedio: number
   porFormaPagamento: { formaPagamento: string; quantidade: number; total: number }[]
   porDia: { dia: string; total: number }[]
+  porSemana: { semana: string; total: number }[]
+  porMes: { mes: string; total: number }[]
   produtosMaisVendidos: { produtoId: number; nome: string; quantidade: number; total: number }[]
   reservas: { comReserva: number; semReserva: number }
   heatmap: { diaSemana: number; hora: number; quantidade: number }[]
@@ -34,16 +41,35 @@ interface VendaDoMes {
   itens: { quantidade: number; produto: { nome: string } }[]
 }
 
+type Granularidade = 'mes' | 'semana' | 'dia'
+
+// Cores vindas dos tokens do tema (globals.css), não fixas como antes —
+// assim o painel acompanha claro/escuro igual ao resto do site. O Recharts
+// aceita `var(...)` direto porque o valor vai parar num atributo SVG.
+const COR_FATURAMENTO = 'var(--chart-1)'
 const CORES_PAGAMENTO: Record<string, string> = {
-  DINHEIRO: '#16a34a',
-  CARTAO: '#2563eb',
-  PIX: '#9333ea',
+  DINHEIRO: 'var(--chart-2)',
+  CARTAO: 'var(--chart-5)',
+  PIX: 'var(--chart-3)',
 }
+const COR_PAGAMENTO_PADRAO = 'var(--chart-4)'
 
 const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
+const GRANULARIDADES: { valor: Granularidade; rotulo: string }[] = [
+  { valor: 'mes', rotulo: 'Por mês' },
+  { valor: 'semana', rotulo: 'Por semana' },
+  { valor: 'dia', rotulo: 'Por dia' },
+]
+
 function formatarMoeda(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+// Valores grandes no eixo Y viram "1,2 mil" pra não estourar a largura.
+function formatarMoedaCurta(valor: number) {
+  if (Math.abs(valor) >= 1000) return `${(valor / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mil`
+  return String(valor)
 }
 
 // O formatter do Tooltip do Recharts aceita number | string | array — na
@@ -92,8 +118,73 @@ function formatarDataCurta(dia: string): string {
   return `${diaN}/${mesN}`
 }
 
+const NOMES_MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+
+function formatarMesCurto(mes: string): string {
+  const [ano, m] = mes.split('-').map(Number)
+  return `${NOMES_MES[m - 1]}/${String(ano).slice(2)}`
+}
+
+// "2026-08-03" (a segunda-feira) vira "03/08 a 09/08".
+function formatarSemana(semana: string): string {
+  const [ano, m, d] = semana.split('-').map(Number)
+  const segunda = new Date(Date.UTC(ano, m - 1, d))
+  const domingo = new Date(segunda.getTime() + 6 * 24 * 60 * 60 * 1000)
+  const dd = (data: Date) =>
+    `${String(data.getUTCDate()).padStart(2, '0')}/${String(data.getUTCMonth() + 1).padStart(2, '0')}`
+  return `${dd(segunda)} a ${dd(domingo)}`
+}
+
+function Cartao({ className, children }: { className?: string; children: React.ReactNode }) {
+  return (
+    <div className={cn('rounded-xl bg-card p-4 ring-1 ring-foreground/10', className)}>{children}</div>
+  )
+}
+
+// Cartão de número grande, no formato do modelo: quadradinho colorido +
+// rótulo pequeno em cima, número grande embaixo.
+function CartaoIndicador({
+  rotulo,
+  valor,
+  icone: Icone,
+}: {
+  rotulo: string
+  valor: string
+  icone: typeof Wallet
+}) {
+  return (
+    <Cartao>
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="flex h-5 w-5 items-center justify-center rounded bg-primary/15 text-primary">
+          <Icone className="h-3 w-3" />
+        </span>
+        {rotulo}
+      </div>
+      <p className="mt-3 font-heading text-2xl font-bold tracking-tight">{valor}</p>
+    </Cartao>
+  )
+}
+
+function TituloCartao({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="mb-3 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+      <span className="h-2.5 w-2.5 rounded-sm bg-primary" />
+      {children}
+    </h2>
+  )
+}
+
+function SemDados() {
+  return <p className="py-8 text-center text-sm text-muted-foreground">Sem vendas neste período.</p>
+}
+
+// Cor de linha/eixo dos gráficos: o Recharts pinta em SVG, então dá pra
+// usar os mesmos tokens do tema.
+const EIXO = { fontSize: 11, stroke: 'var(--muted-foreground)' }
+
 export default function PainelDashboard() {
   const [mes, setMes] = useState(mesAtualString())
+  const [granularidade, setGranularidade] = useState<Granularidade>('dia')
   const [relatorio, setRelatorio] = useState<Relatorio | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
@@ -148,169 +239,276 @@ export default function PainelDashboard() {
       ? Math.round((relatorio.reservas.comReserva / totalReservaBalcao) * 100)
       : 0
 
+  // Os três recortes do faturamento pedidos: mês, semana e dia. "Por mês"
+  // olha os últimos 12 meses (comparação entre meses); os outros dois ficam
+  // dentro do mês selecionado.
+  const serieFaturamento = (() => {
+    if (!relatorio) return { dados: [] as { rotulo: string; total: number }[], titulo: '' }
+    if (granularidade === 'mes') {
+      return {
+        dados: relatorio.porMes.map((p) => ({ rotulo: formatarMesCurto(p.mes), total: p.total })),
+        titulo: 'Faturamento mês a mês (últimos 12 meses)',
+      }
+    }
+    if (granularidade === 'semana') {
+      return {
+        dados: relatorio.porSemana.map((p) => ({ rotulo: formatarSemana(p.semana), total: p.total })),
+        titulo: 'Faturamento por semana (dentro do mês)',
+      }
+    }
+    return {
+      dados: relatorio.porDia.map((p) => ({ rotulo: formatarDataCurta(p.dia), total: p.total })),
+      titulo: 'Faturamento por dia',
+    }
+  })()
+
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 p-4">
+    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 p-4">
       {/* O título "Dashboard" já vem da faixa no topo do painel
           (components/TituloPagina.tsx), então aqui ficam só os controles. */}
-      <div className="flex items-center justify-end">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setMes((m) => somarMeses(m, -1))}
-            className="rounded border border-gray-300 px-2 py-1 text-sm hover:border-gray-900"
-          >
-            ← Anterior
-          </button>
-          <input
-            type="month"
-            value={mes}
-            onChange={(e) => setMes(e.target.value)}
-            className="rounded border border-gray-300 px-2 py-1 text-sm"
-          />
-          <button
-            type="button"
-            onClick={() => setMes((m) => somarMeses(m, 1))}
-            className="rounded border border-gray-300 px-2 py-1 text-sm hover:border-gray-900"
-          >
-            Próximo →
-          </button>
-        </div>
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => setMes((m) => somarMeses(m, -1))}
+          aria-label="Mês anterior"
+          className="rounded-lg border border-border p-1.5 text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <input
+          type="month"
+          value={mes}
+          onChange={(e) => setMes(e.target.value)}
+          aria-label="Mês do relatório"
+          className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+        />
+        <button
+          type="button"
+          onClick={() => setMes((m) => somarMeses(m, 1))}
+          aria-label="Próximo mês"
+          className="rounded-lg border border-border p-1.5 text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
       </div>
 
-      {carregando && <p className="text-sm text-gray-500">Carregando…</p>}
-      {erro && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+      {carregando && <p className="text-sm text-muted-foreground">Carregando…</p>}
+      {erro && <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{erro}</p>}
 
       {relatorio && (
         <>
-          <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded border border-gray-200 p-3">
-              <p className="text-xs text-gray-500">Faturamento no mês</p>
-              <p className="text-lg font-semibold text-gray-900">{formatarMoeda(relatorio.faturamentoTotal)}</p>
-            </div>
-            <div className="rounded border border-gray-200 p-3">
-              <p className="text-xs text-gray-500">Ticket médio</p>
-              <p className="text-lg font-semibold text-gray-900">{formatarMoeda(relatorio.ticketMedio)}</p>
-            </div>
-            <div className="rounded border border-gray-200 p-3">
-              <p className="text-xs text-gray-500">Total de vendas</p>
-              <p className="text-lg font-semibold text-gray-900">{relatorio.totalVendas}</p>
-            </div>
-            <div className="rounded border border-gray-200 p-3">
-              <p className="text-xs text-gray-500">Vendas com reserva</p>
-              <p className="text-lg font-semibold text-gray-900">{percentualReserva}%</p>
-            </div>
+          <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <CartaoIndicador
+              rotulo="Faturamento no mês"
+              valor={formatarMoeda(relatorio.faturamentoTotal)}
+              icone={Wallet}
+            />
+            <CartaoIndicador
+              rotulo="Total de vendas"
+              valor={String(relatorio.totalVendas)}
+              icone={Receipt}
+            />
+            <CartaoIndicador
+              rotulo="Ticket médio"
+              valor={formatarMoeda(relatorio.ticketMedio)}
+              icone={TrendingUp}
+            />
+            <CartaoIndicador
+              rotulo="Vendas com reserva"
+              valor={`${percentualReserva}%`}
+              icone={CalendarDays}
+            />
           </section>
 
-          <section>
-            <h2 className="mb-2 text-sm font-medium text-gray-600">Faturamento por dia</h2>
-            {relatorio.porDia.length === 0 ? (
-              <p className="text-sm text-gray-400">Sem vendas neste mês.</p>
+          <Cartao>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <TituloCartao>{serieFaturamento.titulo}</TituloCartao>
+              {/* Os três recortes pedidos: mês, semana e dia. */}
+              <div className="flex gap-1 rounded-lg bg-muted p-1">
+                {GRANULARIDADES.map((opcao) => (
+                  <button
+                    key={opcao.valor}
+                    type="button"
+                    onClick={() => setGranularidade(opcao.valor)}
+                    aria-pressed={granularidade === opcao.valor}
+                    className={cn(
+                      'rounded-md px-3 py-1 text-xs font-medium transition-colors',
+                      granularidade === opcao.valor
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    {opcao.rotulo}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {serieFaturamento.dados.length === 0 ? (
+              <SemDados />
             ) : (
               <div style={{ width: '100%', height: 260 }}>
                 <ResponsiveContainer>
-                  <BarChart data={relatorio.porDia}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="dia" tickFormatter={(d: string) => d.slice(8, 10)} fontSize={12} />
-                    <YAxis fontSize={12} />
-                    <Tooltip formatter={(valor: ValorTooltip) => formatarMoeda(paraNumero(valor))} />
-                    <Bar dataKey="total" fill="#111827" radius={[2, 2, 0, 0]} />
-                  </BarChart>
+                  <LineChart data={serieFaturamento.dados} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                    <XAxis dataKey="rotulo" tick={EIXO} tickLine={false} axisLine={false} />
+                    <YAxis
+                      tick={EIXO}
+                      tickLine={false}
+                      axisLine={false}
+                      width={56}
+                      tickFormatter={(v: number) => formatarMoedaCurta(v)}
+                    />
+                    <Tooltip
+                      formatter={(valor: ValorTooltip) => [formatarMoeda(paraNumero(valor)), 'Faturamento']}
+                      contentStyle={{
+                        background: 'var(--popover)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 8,
+                        fontSize: 12,
+                        color: 'var(--popover-foreground)',
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="total"
+                      stroke={COR_FATURAMENTO}
+                      strokeWidth={2.5}
+                      dot={{ r: 3, fill: COR_FATURAMENTO }}
+                      activeDot={{ r: 5 }}
+                    />
+                  </LineChart>
                 </ResponsiveContainer>
               </div>
             )}
-          </section>
+          </Cartao>
 
-          <section>
-            <h2 className="mb-2 text-sm font-medium text-gray-600">
-              Vendas do mês <span className="font-normal text-gray-400">(agrupadas por dia)</span>
-            </h2>
-            {carregandoVendas && <p className="text-sm text-gray-500">Carregando…</p>}
-            {erroVendas && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{erroVendas}</p>}
-            {!carregandoVendas && diasComVendas.length === 0 && (
-              <p className="text-sm text-gray-400">Sem vendas neste mês.</p>
-            )}
-            <div className="flex flex-col gap-3">
-              {diasComVendas.map((dia) => {
-                const vendasDoDia = vendasPorDia.get(dia)!
-                const totalDoDia = vendasDoDia.reduce((soma, v) => soma + Number(v.valorTotal), 0)
-                return (
-                  <div key={dia} className="rounded border border-gray-200">
-                    <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-3 py-1.5">
-                      <span className="text-sm font-medium text-gray-700">{formatarDataCurta(dia)}</span>
-                      <span className="text-sm font-medium text-gray-700">{formatarMoeda(totalDoDia)}</span>
-                    </div>
-                    <ul className="divide-y divide-gray-100">
-                      {vendasDoDia.map((venda) => (
-                        <li key={venda.id} className="flex items-center justify-between px-3 py-1.5 text-sm">
-                          <span className="text-gray-600">
-                            {horaLocal(venda.dataHora)} —{' '}
-                            {venda.itens.map((item) => `${item.quantidade}x ${item.produto.nome}`).join(', ')}
+          <section className="grid gap-4 lg:grid-cols-2">
+            <Cartao>
+              <TituloCartao>Forma de pagamento</TituloCartao>
+              {relatorio.porFormaPagamento.length === 0 ? (
+                <SemDados />
+              ) : (
+                // Rosca em cima e legenda embaixo (e não lado a lado): o
+                // cartão tem ~330px dentro do quadro central, e lado a lado
+                // sobrava tão pouco pra legenda que o valor em reais saía
+                // cortado no meio ("R$ 31,0…").
+                <div className="flex flex-col items-center gap-3">
+                  <div style={{ width: 150, height: 150 }} className="shrink-0">
+                    <ResponsiveContainer>
+                      <PieChart>
+                        <Pie
+                          data={relatorio.porFormaPagamento}
+                          dataKey="total"
+                          nameKey="formaPagamento"
+                          innerRadius={38}
+                          outerRadius={68}
+                          paddingAngle={2}
+                          stroke="none"
+                        >
+                          {relatorio.porFormaPagamento.map((item) => (
+                            <Cell
+                              key={item.formaPagamento}
+                              fill={CORES_PAGAMENTO[item.formaPagamento] ?? COR_PAGAMENTO_PADRAO}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(valor: ValorTooltip) => formatarMoeda(paraNumero(valor))}
+                          contentStyle={{
+                            background: 'var(--popover)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 8,
+                            fontSize: 12,
+                            color: 'var(--popover-foreground)',
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Legenda escrita à mão: o Legend do Recharts não mostra
+                      valor nem percentual, e é isso que interessa aqui. */}
+                  <ul className="flex w-full flex-col gap-2 text-sm">
+                    {relatorio.porFormaPagamento.map((item) => {
+                      const fatia =
+                        relatorio.faturamentoTotal > 0
+                          ? Math.round((item.total / relatorio.faturamentoTotal) * 100)
+                          : 0
+                      return (
+                        <li key={item.formaPagamento} className="flex items-center gap-2">
+                          <span
+                            className="h-2.5 w-2.5 shrink-0 rounded-sm"
+                            style={{
+                              background:
+                                CORES_PAGAMENTO[item.formaPagamento] ?? COR_PAGAMENTO_PADRAO,
+                            }}
+                          />
+                          <span className="flex-1 text-muted-foreground capitalize">
+                            {item.formaPagamento.toLowerCase()}
                           </span>
-                          <span className="flex items-center gap-2 whitespace-nowrap text-gray-900">
-                            <span className="text-xs text-gray-400">{venda.formaPagamento}</span>
-                            {formatarMoeda(Number(venda.valorTotal))}
+                          <span className="font-medium">{fatia}%</span>
+                          <span className="shrink-0 text-right text-xs whitespace-nowrap text-muted-foreground">
+                            {formatarMoeda(item.total)}
                           </span>
                         </li>
-                      ))}
-                    </ul>
-                  </div>
-                )
-              })}
-            </div>
-          </section>
-
-          <section className="grid gap-6 sm:grid-cols-2">
-            <div>
-              <h2 className="mb-2 text-sm font-medium text-gray-600">Forma de pagamento</h2>
-              {relatorio.porFormaPagamento.length === 0 ? (
-                <p className="text-sm text-gray-400">Sem vendas neste mês.</p>
-              ) : (
-                <div style={{ width: '100%', height: 220 }}>
-                  <ResponsiveContainer>
-                    <PieChart>
-                      <Pie data={relatorio.porFormaPagamento} dataKey="total" nameKey="formaPagamento" outerRadius={80} label>
-                        {relatorio.porFormaPagamento.map((item) => (
-                          <Cell key={item.formaPagamento} fill={CORES_PAGAMENTO[item.formaPagamento] ?? '#999'} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(valor: ValorTooltip) => formatarMoeda(paraNumero(valor))} />
-                    </PieChart>
-                  </ResponsiveContainer>
+                      )
+                    })}
+                  </ul>
                 </div>
               )}
-            </div>
+            </Cartao>
 
-            <div>
-              <h2 className="mb-2 text-sm font-medium text-gray-600">Produtos mais vendidos</h2>
+            <Cartao>
+              <TituloCartao>Produtos mais vendidos</TituloCartao>
               {relatorio.produtosMaisVendidos.length === 0 ? (
-                <p className="text-sm text-gray-400">Sem vendas neste mês.</p>
+                <SemDados />
               ) : (
-                <div style={{ width: '100%', height: 220 }}>
+                <div style={{ width: '100%', height: 190 }}>
                   <ResponsiveContainer>
-                    <BarChart data={relatorio.produtosMaisVendidos} layout="vertical" margin={{ left: 24 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" fontSize={12} />
-                      <YAxis type="category" dataKey="nome" width={100} fontSize={12} />
-                      <Tooltip formatter={(valor: ValorTooltip) => `${paraNumero(valor)} un.`} />
-                      <Bar dataKey="quantidade" fill="#111827" radius={[0, 2, 2, 0]} />
+                    <BarChart
+                      data={relatorio.produtosMaisVendidos.slice(0, 5)}
+                      layout="vertical"
+                      margin={{ left: 8, right: 16 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+                      <XAxis type="number" tick={EIXO} tickLine={false} axisLine={false} />
+                      <YAxis
+                        type="category"
+                        dataKey="nome"
+                        width={110}
+                        tick={EIXO}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip
+                        cursor={{ fill: 'var(--muted)' }}
+                        formatter={(valor: ValorTooltip) => [`${paraNumero(valor)} un.`, 'Vendidos']}
+                        contentStyle={{
+                          background: 'var(--popover)',
+                          border: '1px solid var(--border)',
+                          borderRadius: 8,
+                          fontSize: 12,
+                          color: 'var(--popover-foreground)',
+                        }}
+                      />
+                      <Bar dataKey="quantidade" fill={COR_FATURAMENTO} radius={[0, 4, 4, 0]} barSize={16} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               )}
-            </div>
+            </Cartao>
           </section>
 
-          <section>
-            <h2 className="mb-2 text-sm font-medium text-gray-600">
-              Horários de maior movimento <span className="font-normal text-gray-400">(dia × hora)</span>
-            </h2>
+          <Cartao>
+            <TituloCartao>Horários de maior movimento (dia × hora)</TituloCartao>
             <div className="overflow-x-auto">
-              <table className="border-collapse text-xs">
+              <table className="border-collapse text-[0.65rem]">
                 <thead>
                   <tr>
-                    <th className="w-10" />
+                    <th className="w-8" />
                     {Array.from({ length: 24 }, (_, hora) => (
-                      <th key={hora} className="w-6 px-0.5 py-1 text-center font-normal text-gray-400">
+                      <th key={hora} className="w-5 px-0.5 py-1 text-center font-normal text-muted-foreground">
                         {hora}
                       </th>
                     ))}
@@ -319,7 +517,7 @@ export default function PainelDashboard() {
                 <tbody>
                   {DIAS_SEMANA.map((nomeDia, diaSemana) => (
                     <tr key={nomeDia}>
-                      <td className="pr-2 text-right text-gray-500">{nomeDia}</td>
+                      <td className="pr-2 text-right text-muted-foreground">{nomeDia}</td>
                       {Array.from({ length: 24 }, (_, hora) => {
                         const quantidade = heatmapPorCelula.get(`${diaSemana}-${hora}`) ?? 0
                         const intensidade = quantidade / heatmapMax
@@ -327,11 +525,15 @@ export default function PainelDashboard() {
                           <td key={hora} className="p-0.5">
                             <div
                               title={`${nomeDia} ${hora}h — ${quantidade} venda(s)`}
-                              className="h-5 w-5 rounded-sm"
-                              style={{
-                                backgroundColor:
-                                  quantidade === 0 ? '#f3f4f6' : `rgba(17, 24, 39, ${0.15 + intensidade * 0.85})`,
-                              }}
+                              className={cn('h-4 w-4 rounded-sm', quantidade === 0 && 'bg-muted')}
+                              style={
+                                quantidade === 0
+                                  ? undefined
+                                  : {
+                                      backgroundColor: COR_FATURAMENTO,
+                                      opacity: 0.25 + intensidade * 0.75,
+                                    }
+                              }
                             />
                           </td>
                         )
@@ -341,7 +543,53 @@ export default function PainelDashboard() {
                 </tbody>
               </table>
             </div>
-          </section>
+          </Cartao>
+
+          <Cartao>
+            <TituloCartao>Vendas do mês (agrupadas por dia)</TituloCartao>
+            {carregandoVendas && <p className="text-sm text-muted-foreground">Carregando…</p>}
+            {erroVendas && (
+              <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{erroVendas}</p>
+            )}
+            {!carregandoVendas && diasComVendas.length === 0 && <SemDados />}
+            {diasComVendas.length > 0 && (
+              // Rolagem interna: a lista cresce com o mês inteiro e, solta,
+              // empurraria o resto do painel pra bem longe.
+              <div className="flex max-h-80 flex-col gap-3 overflow-y-auto pr-1">
+                {diasComVendas.map((dia) => {
+                  const vendasDoDia = vendasPorDia.get(dia)!
+                  const totalDoDia = vendasDoDia.reduce((soma, v) => soma + Number(v.valorTotal), 0)
+                  return (
+                    <div key={dia} className="overflow-hidden rounded-lg border border-border">
+                      <div className="flex items-center justify-between border-b border-border bg-muted/60 px-3 py-1.5">
+                        <span className="text-sm font-medium">{formatarDataCurta(dia)}</span>
+                        <span className="text-sm font-medium">{formatarMoeda(totalDoDia)}</span>
+                      </div>
+                      <ul className="divide-y divide-border">
+                        {vendasDoDia.map((venda) => (
+                          <li
+                            key={venda.id}
+                            className="flex items-center justify-between gap-3 px-3 py-1.5 text-sm"
+                          >
+                            <span className="text-muted-foreground">
+                              {horaLocal(venda.dataHora)} —{' '}
+                              {venda.itens
+                                .map((item) => `${item.quantidade}x ${item.produto.nome}`)
+                                .join(', ')}
+                            </span>
+                            <span className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+                              <span className="text-xs text-muted-foreground">{venda.formaPagamento}</span>
+                              {formatarMoeda(Number(venda.valorTotal))}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </Cartao>
         </>
       )}
     </div>

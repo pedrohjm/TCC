@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Settings, ShoppingCart, Store } from 'lucide-react'
+import { LayoutDashboard, PackageX, Settings, ShoppingCart, Store } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -95,6 +95,14 @@ export function AppSidebar({ papel }: AppSidebarProps) {
                   <SidebarMenuButton render={<Link href="/vendas" />} isActive={pathname === '/vendas'}>
                     <ShoppingCart />
                     <span>Registrar venda</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                {/* Fica em "Operação" (qualquer papel), não em "Gestão":
+                    quem vê o sabor acabar é quem está no balcão. */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton render={<Link href="/estoque" />} isActive={pathname === '/estoque'}>
+                    <PackageX />
+                    <span>Falta no estoque</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>

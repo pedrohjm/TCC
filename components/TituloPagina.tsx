@@ -12,6 +12,7 @@ import { ITENS_CARDAPIO } from '@/lib/nav-cardapio'
 // por esta faixa.
 const TITULOS: Record<string, string> = {
   '/vendas': 'Registrar venda',
+  '/estoque': 'Falta no estoque',
   '/dashboard': 'Dashboard',
   '/perfil': 'Editar perfil',
   '/estabelecimento': 'Estabelecimento',
