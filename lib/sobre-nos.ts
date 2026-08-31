@@ -1,6 +1,4 @@
 import {
-  Award,
-  CalendarDays,
   HandHeart,
   Heart,
   IceCream2,
@@ -8,7 +6,6 @@ import {
   Smile,
   Sparkles,
   Star,
-  Users,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -18,13 +15,6 @@ export interface ItemSobreNos {
   icone: LucideIcon
   /** Ícone pequeno sobreposto no canto do ícone principal (enfeite). */
   iconeSecundario: LucideIcon
-}
-
-export interface NumeroSobreNos {
-  valor: number
-  sufixo: string
-  rotulo: string
-  icone: LucideIcon
 }
 
 // Texto de apresentação da loja. Ainda genérico — troque quando o texto
@@ -63,15 +53,4 @@ export const ITENS_SOBRE_NOS: ItemSobreNos[] = [
     icone: HandHeart,
     iconeSecundario: Smile,
   },
-]
-
-// ATENÇÃO: números ainda são de exemplo (placeholder), não são dados reais
-// da loja. Troque pelos números de verdade antes de mostrar o site pra
-// alguém de fora — número inventado em site de loja é informação errada
-// pro cliente, não é só enfeite.
-export const NUMEROS_SOBRE_NOS: NumeroSobreNos[] = [
-  { valor: 30, sufixo: '+', rotulo: 'Sabores no cardápio', icone: IceCreamBowl },
-  { valor: 10, sufixo: '', rotulo: 'Anos de história', icone: CalendarDays },
-  { valor: 5000, sufixo: '+', rotulo: 'Clientes atendidos', icone: Users },
-  { valor: 98, sufixo: '%', rotulo: 'Voltariam a comprar', icone: Award },
 ]

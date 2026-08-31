@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { motion, useInView, useSpring, useTransform, type Variants } from 'motion/react'
+import { useRef } from 'react'
+import { motion, useInView, type Variants } from 'motion/react'
 import { Store, Zap, type LucideIcon } from 'lucide-react'
 import { useImagemComFallback } from '@/hooks/use-imagem-com-fallback'
 
@@ -12,19 +12,11 @@ export interface AboutItem {
   iconeSecundario: LucideIcon
 }
 
-export interface AboutStat {
-  valor: number
-  sufixo: string
-  rotulo: string
-  icone: LucideIcon
-}
-
 interface AboutUsSectionProps {
   rotuloTopo: string
   titulo: string
   texto: string
   itens: AboutItem[]
-  numeros: AboutStat[]
   imagemSrc: string
   imagemAlt: string
 }
@@ -43,7 +35,11 @@ interface AboutUsSectionProps {
 //   estreito demais pra um parágrafo. Então virou: imagem centralizada no
 //   topo e itens numa grade de 2 colunas abaixo, mantendo o resto do
 //   visual (moldura deslocada atrás da foto, bolinhas flutuantes, ícone em
-//   caixa arredondada, contadores animados);
+//   caixa arredondada);
+// - saiu a faixa de números do original (e com ela o contador animado):
+//   eram valores inventados — quantidade de clientes, anos de casa — e
+//   número falso em site de loja é informação errada pro cliente, não
+//   enfeite. Se um dia existirem os números reais, dá pra trazer de volta;
 // - a imagem vem de `public/images/` com fallback (convenção do site) em
 //   vez do link do Unsplash do original;
 // - saiu o CTA final ("Ready to transform your space?"): a seção "Fale
@@ -56,14 +52,11 @@ export function AboutUsSection({
   titulo,
   texto,
   itens,
-  numeros,
   imagemSrc,
   imagemAlt,
 }: AboutUsSectionProps) {
   const secaoRef = useRef<HTMLElement>(null)
-  const numerosRef = useRef<HTMLDivElement>(null)
   const estaVisivel = useInView(secaoRef, { once: true, amount: 0.1 })
-  const numerosVisiveis = useInView(numerosRef, { once: true, amount: 0.3 })
 
   const variantesContainer: Variants = {
     hidden: { opacity: 0 },
@@ -136,17 +129,6 @@ export function AboutUsSection({
         <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
           {itens.map((item, indice) => (
             <ItemSobre key={item.titulo} item={item} variantes={variantesItem} atraso={indice * 0.1} />
-          ))}
-        </div>
-
-        <div ref={numerosRef} className="mt-12 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {numeros.map((numero, indice) => (
-            <ContadorNumero
-              key={numero.rotulo}
-              numero={numero}
-              visivel={numerosVisiveis}
-              atraso={indice * 0.1}
-            />
           ))}
         </div>
       </motion.div>
@@ -230,47 +212,6 @@ function ItemSobre({
         </h3>
       </div>
       <p className="pl-14 text-sm leading-relaxed text-muted-foreground">{item.descricao}</p>
-    </motion.div>
-  )
-}
-
-function ContadorNumero({
-  numero,
-  visivel,
-  atraso,
-}: {
-  numero: AboutStat
-  visivel: boolean
-  atraso: number
-}) {
-  const Icone = numero.icone
-  const valorSuave = useSpring(0, { stiffness: 50, damping: 12 })
-  const valorExibido = useTransform(valorSuave, (atual) => Math.floor(atual).toLocaleString('pt-BR'))
-
-  useEffect(() => {
-    if (visivel) valorSuave.set(numero.valor)
-  }, [visivel, numero.valor, valorSuave])
-
-  return (
-    <motion.div
-      className="group flex flex-col items-center rounded-xl bg-background/70 p-4 text-center backdrop-blur-sm transition-colors duration-300 hover:bg-background"
-      initial={{ opacity: 0, y: 20 }}
-      animate={visivel ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ duration: 0.6, delay: atraso }}
-      whileHover={{ y: -5, transition: { duration: 0.2 } }}
-    >
-      <motion.span
-        className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary/20"
-        whileHover={{ rotate: 360, transition: { duration: 0.8 } }}
-      >
-        <Icone className="h-5 w-5" />
-      </motion.span>
-      <span className="flex items-baseline font-heading text-xl font-bold sm:text-2xl">
-        <motion.span>{valorExibido}</motion.span>
-        <span>{numero.sufixo}</span>
-      </span>
-      <p className="mt-1 text-xs text-muted-foreground">{numero.rotulo}</p>
-      <span className="mt-2 h-0.5 w-8 bg-primary transition-all duration-300 group-hover:w-14" />
     </motion.div>
   )
 }

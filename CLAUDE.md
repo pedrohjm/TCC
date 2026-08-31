@@ -544,10 +544,8 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       porque quem rola aqui não é a janela e sim o painel de conteúdo).
       **Lição pra próxima:** `blur` grande + rolagem não combinam; pra
       manchas decorativas use `radial-gradient`.
-    - **Números são placeholder** (30 sabores, 10 anos, 5000 clientes,
-      98%) — marcado em maiúsculas no `lib/sobre-nos.ts`. Número inventado
-      em site de loja é informação errada pro cliente, tem que trocar
-      pelos reais antes de mostrar pra alguém de fora.
+    - ~~Números placeholder (30 sabores, 10 anos, 5000 clientes, 98%)~~ —
+      **removidos em 2026-08-31** (item 23), junto com o contador animado.
     - Os 5 cards de categoria que ficavam na home (atalho pra
       `/cardapio/<slug>`) saíram a pedido do usuário. A navegação pras
       categorias continua no menu lateral (desktop) e no submenu do botão
@@ -688,6 +686,22 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       as protegesse elas redirecionariam pra si mesmas em loop.
     - `TituloPagina` perdeu as entradas `/` e `/login` — nenhuma das duas
       passa mais pela faixa de título da janela.
+
+23. ~~Tirar a faixa de números da landing~~ ✅ concluído (2026-08-31) — os
+    quatro números ("30+ sabores", "10 anos de história", "5.000+ clientes
+    atendidos", "98% voltariam a comprar") saíram dos **dois** lugares
+    onde apareciam: a faixa de cartões no fim do "Sobre nós" e a linha
+    embaixo dos botões do hero (que mostrava os três primeiros da mesma
+    lista). Eram valores inventados — número falso em site de loja é
+    informação errada pro cliente, não enfeite — e não havia como
+    substituí-los pelos reais.
+    Removidos junto: `NUMEROS_SOBRE_NOS` e o tipo `NumeroSobreNos`
+    (`lib/sobre-nos.ts`), o tipo `AboutStat` e a prop `numeros`
+    (`components/ui/about-us-section.tsx`) e a função `ContadorNumero`
+    (o contador animado que subia o número quando entrava na tela) — com
+    ela saíram também os imports de `useEffect`, `useSpring` e
+    `useTransform`, que só existiam por causa dela. Se um dia existirem os
+    números reais, o histórico do git tem o componente pronto.
 
 ## Convenções de código
 

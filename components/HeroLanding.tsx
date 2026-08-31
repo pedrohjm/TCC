@@ -4,22 +4,20 @@ import { motion } from 'motion/react'
 import { ArrowRight, BadgeCheck, MapPin, Store } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useImagemComFallback } from '@/hooks/use-imagem-com-fallback'
-import { NUMEROS_SOBRE_NOS } from '@/lib/sobre-nos'
 
 const SRC_HERO = '/images/banners/home.jpg'
 
 // Hero no formato do modelo em public/images/modelo/homepage.png: texto
-// à esquerda (rótulo pequeno, título grande em duas cores, parágrafo,
-// botões e uma linha de números embaixo) e uma imagem grande à direita.
-// As cores são as do tema da loja (morango/menta), não o verde escuro do
-// modelo, pra continuar funcionando nos dois temas do site.
+// à esquerda (rótulo pequeno, título grande em duas cores, parágrafo e
+// botões) e uma imagem grande à direita. As cores são as do tema da loja
+// (morango/menta), não o verde escuro do modelo, pra continuar
+// funcionando nos dois temas do site.
+//
+// A linha de números que o modelo tem embaixo dos botões saiu junto com a
+// faixa de números do "Sobre nós": eram valores inventados, e número falso
+// em site de loja é informação errada pro cliente.
 export function HeroLanding() {
   const { falhou, imgRef, onError } = useImagemComFallback(SRC_HERO)
-
-  // Os três primeiros números do "Sobre nós" — mesma fonte de dados, pra
-  // não ter dois lugares com os mesmos valores (ver lib/sobre-nos.ts,
-  // onde eles ainda são placeholder).
-  const numeros = NUMEROS_SOBRE_NOS.slice(0, 3)
 
   return (
     <section
@@ -80,18 +78,6 @@ export function HeroLanding() {
               <MapPin className="h-4 w-4" />
               Como chegar
             </Button>
-          </div>
-
-          <div className="mt-9 flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6">
-            {numeros.map((numero) => (
-              <div key={numero.rotulo}>
-                <p className="font-heading text-2xl font-bold">
-                  {numero.valor.toLocaleString('pt-BR')}
-                  {numero.sufixo}
-                </p>
-                <p className="text-xs text-muted-foreground">{numero.rotulo}</p>
-              </div>
-            ))}
           </div>
         </motion.div>
 
