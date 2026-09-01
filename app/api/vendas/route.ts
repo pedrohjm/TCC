@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { criarVendaSchema } from '@/lib/validations/venda'
+import { calcularVenda, type ProdutoComRegra } from '@/lib/precos'
 import { exigirSessao } from '@/lib/auth-helpers'
 import { limitesDoMes } from '@/lib/relatorios'
 
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const { formaPagamento, reservaId, itens } = resultado.data
+  const { formaPagamento, reservaId, descricao, itens } = resultado.data
   const usuarioId = Number(sessao.user.id)
 
   if (reservaId) {
@@ -91,22 +92,47 @@ export async function POST(request: NextRequest) {
     if (!produto.ativo) {
       return NextResponse.json({ erro: `Produto "${produto.nome}" está inativo` }, { status: 400 })
     }
+    // O valor digitado só faz sentido no self-service. Exigir aqui evita
+    // dois enganos opostos: uma venda de self-service gravada como zero, e
+    // um valor mandado por fora tentando furar o preço de tabela.
+    if (produto.regraPreco === 'LIVRE' && !item.valor) {
+      return NextResponse.json(
+        { erro: `Informe o valor de "${produto.nome}"` },
+        { status: 400 }
+      )
+    }
+    if (produto.regraPreco !== 'LIVRE' && item.valor !== undefined) {
+      return NextResponse.json(
+        { erro: `"${produto.nome}" tem preço de tabela — não aceita valor digitado` },
+        { status: 400 }
+      )
+    }
   }
 
-  // O preço unitário vem do banco, nunca do corpo da requisição — assim um
-  // valor adulterado no request não muda quanto o cliente paga.
-  const itensComPreco = itens.map((item) => {
-    const produto = produtoPorId.get(item.produtoId)!
-    return {
-      produtoId: item.produtoId,
-      quantidade: item.quantidade,
-      precoUnitario: produto.preco,
-    }
-  })
+  // Os preços vêm do banco, nunca do corpo da requisição — assim um valor
+  // adulterado no request não muda quanto o cliente paga. A exceção é o
+  // self-service (regra LIVRE), que não tem preço de tabela: aí o valor é
+  // digitado mesmo, e o que a rota faz é conferir que o produto é desse
+  // tipo (o laço acima) e respeitar o teto do schema.
+  //
+  // A conta em si mora em lib/precos.ts, o mesmo arquivo que a tela usa
+  // pra mostrar o total enquanto o pedido é montado. Precisa ser refeita
+  // aqui porque quem manda é o servidor — e porque uma linha depende das
+  // outras: 1 pote comum + 1 pote de açaí já são 2 potes, e isso muda o
+  // preço do comum.
+  const paraCalculo: ProdutoComRegra[] = produtos.map((produto) => ({
+    id: produto.id,
+    nome: produto.nome,
+    preco: Number(produto.preco),
+    regraPreco: produto.regraPreco,
+    quantidadeRegra: produto.quantidadeRegra,
+    precoRegra: produto.precoRegra === null ? null : Number(produto.precoRegra),
+    grupoPreco: produto.grupoPreco,
+  }))
 
-  const valorTotal = itensComPreco.reduce(
-    (total, item) => total + Number(item.precoUnitario) * item.quantidade,
-    0
+  const { linhas, total: valorTotal } = calcularVenda(
+    itens,
+    new Map(paraCalculo.map((produto) => [produto.id, produto]))
   )
 
   const venda = await prisma.venda.create({
@@ -114,8 +140,9 @@ export async function POST(request: NextRequest) {
       usuarioId,
       formaPagamento,
       reservaId,
+      descricao,
       valorTotal,
-      itens: { create: itensComPreco },
+      itens: { create: linhas },
     },
     include: incluirRelacoes,
   })

@@ -47,12 +47,43 @@ async function main() {
     }),
   ])
 
-  const [casquinhaSimples, casquinhaDupla, acai, milkShake, sundae] = await Promise.all([
-    prisma.produto.create({ data: { nome: 'Casquinha Simples', preco: 8.0 } }),
-    prisma.produto.create({ data: { nome: 'Casquinha Dupla', preco: 12.0 } }),
-    prisma.produto.create({ data: { nome: 'Açaí 300ml', preco: 15.0 } }),
-    prisma.produto.create({ data: { nome: 'Milk-shake', preco: 18.0 } }),
-    prisma.produto.create({ data: { nome: 'Sundae', preco: 14.0 } }),
+  // Tabela de preços da loja. As regras estão explicadas no enum
+  // `RegraPreco` do schema; o cálculo em si mora em lib/precos.ts.
+  //
+  // Os dois potes dividem o grupo POTE_1800: eles somam quantidade pra
+  // decidir se o desconto pegou, então 1 pote comum + 1 de açaí já contam
+  // como 2 potes (o comum cai pra 25,00; o açaí, que é UNITARIO, fica nos
+  // 33,00 dele).
+  const [pote, poteAcai, picole, caixa, caixaAcai, selfService] = await Promise.all([
+    prisma.produto.create({
+      data: {
+        nome: 'Pote 1800 mL',
+        preco: 27.0,
+        ordem: 1,
+        regraPreco: 'ESCALONADO',
+        quantidadeRegra: 2,
+        precoRegra: 25.0,
+        grupoPreco: 'POTE_1800',
+      },
+    }),
+    prisma.produto.create({
+      data: { nome: 'Pote 1800 mL — Açaí', preco: 33.0, grupoPreco: 'POTE_1800', ordem: 2 },
+    }),
+    prisma.produto.create({
+      data: {
+        nome: 'Picolé',
+        preco: 3.0,
+        ordem: 3,
+        regraPreco: 'PACOTE',
+        quantidadeRegra: 4,
+        precoRegra: 10.0,
+      },
+    }),
+    prisma.produto.create({ data: { nome: 'Caixa', preco: 120.0, ordem: 4 } }),
+    prisma.produto.create({ data: { nome: 'Caixa — Açaí', preco: 160.0, ordem: 5 } }),
+    prisma.produto.create({
+      data: { nome: 'SelfService', preco: 0, regraPreco: 'LIVRE', ordem: 6 },
+    }),
   ])
 
   const reservaConcluida = await prisma.reserva.create({
@@ -71,42 +102,62 @@ async function main() {
     },
   })
 
-  // Venda 1: balcão, sem reserva, pago no Pix.
+  // As vendas de exemplo cobrem de propósito uma regra de preço cada, pra
+  // o dashboard ter número pra mostrar e pra dar pra conferir a conta.
+
+  // Venda 1: 2 potes comuns — o desconto pegou, os DOIS a 25,00.
   await prisma.venda.create({
     data: {
-      valorTotal: 31.0, // 2x Casquinha Simples (16) + 1x Açaí (15)
+      valorTotal: 50.0,
       formaPagamento: 'PIX',
+      usuarioId: atendente.id,
+      descricao: 'Cliente levou os dois potes de uma vez.',
+      itens: {
+        create: [{ produtoId: pote.id, quantidade: 2, precoUnitario: 25.0, subtotal: 50.0 }],
+      },
+    },
+  })
+
+  // Venda 2: 5 picolés — 1 pacote de 4 (10,00) + 1 avulso (3,00).
+  await prisma.venda.create({
+    data: {
+      valorTotal: 13.0,
+      formaPagamento: 'DINHEIRO',
+      usuarioId: dona.id,
+      reservaId: reservaConcluida.id,
+      itens: {
+        create: [{ produtoId: picole.id, quantidade: 5, precoUnitario: 3.0, subtotal: 13.0 }],
+      },
+    },
+  })
+
+  // Venda 3: 1 pote comum + 1 de açaí. São 2 potes no grupo, então o comum
+  // saiu a 25,00; o açaí fica nos 33,00 dele.
+  await prisma.venda.create({
+    data: {
+      valorTotal: 58.0,
+      formaPagamento: 'CARTAO',
       usuarioId: atendente.id,
       itens: {
         create: [
-          { produtoId: casquinhaSimples.id, quantidade: 2, precoUnitario: 8.0 },
-          { produtoId: acai.id, quantidade: 1, precoUnitario: 15.0 },
+          { produtoId: pote.id, quantidade: 1, precoUnitario: 25.0, subtotal: 25.0 },
+          { produtoId: poteAcai.id, quantidade: 1, precoUnitario: 33.0, subtotal: 33.0 },
         ],
       },
     },
   })
 
-  // Venda 2: vinculada à reserva do Pedro Alves, pago em dinheiro.
+  // Venda 4: self-service, valor pesado no balcão.
   await prisma.venda.create({
     data: {
-      valorTotal: 14.0, // 1x Sundae
-      formaPagamento: 'DINHEIRO',
-      usuarioId: dona.id,
-      reservaId: reservaConcluida.id,
-      itens: {
-        create: [{ produtoId: sundae.id, quantidade: 1, precoUnitario: 14.0 }],
-      },
-    },
-  })
-
-  // Venda 3: balcão, pago no cartão.
-  await prisma.venda.create({
-    data: {
-      valorTotal: 36.0, // 2x Milk-shake
-      formaPagamento: 'CARTAO',
+      valorTotal: 18.5,
+      formaPagamento: 'PIX',
       usuarioId: atendente.id,
+      descricao: 'Pote montado no self-service, 370 g.',
       itens: {
-        create: [{ produtoId: milkShake.id, quantidade: 2, precoUnitario: 18.0 }],
+        create: [
+          { produtoId: selfService.id, quantidade: 1, precoUnitario: 18.5, subtotal: 18.5 },
+        ],
       },
     },
   })
@@ -114,15 +165,17 @@ async function main() {
   await prisma.fechamentoCaixa.create({
     data: {
       data: new Date('2026-07-29T23:59:59'),
-      totalDinheiro: 14.0,
-      totalCartao: 36.0,
-      totalPix: 31.0,
+      totalDinheiro: 13.0,
+      totalCartao: 58.0,
+      totalPix: 68.5,
       observacoes: 'Fechamento de exemplo gerado pelo seed.',
     },
   })
 
-  // casquinhaDupla fica sem venda de propósito, pra testar produto "sem saída" no dashboard.
-  void casquinhaDupla
+  // As caixas ficam sem venda de propósito, pra testar produto "sem saída"
+  // no dashboard.
+  void caixa
+  void caixaAcai
 
   // Sabores dos potes de 1800ml — catálogo só pra exibição no cardápio
   // público (/cardapio/sabores-1800ml), sem relação com Produto/Venda.
@@ -188,7 +241,7 @@ async function main() {
     ],
   })
 
-  console.log('Seed concluído: 2 usuários, 5 produtos, 2 reservas, 3 vendas, 1 fechamento de caixa, 9 sabores.')
+  console.log('Seed concluído: 2 usuários, 6 produtos, 2 reservas, 4 vendas, 1 fechamento de caixa, 9 sabores.')
   console.log(`Login de teste: ana@sorveteria.com / joao@sorveteria.com — senha "${SENHA_TESTE}"`)
 }
 

@@ -803,6 +803,62 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       incomodava tanto quando era uma página separada; virando aba
       vizinha de um dashboard já convertido, ficava gritante.
 
+27. ~~Tabela de preços de verdade: regras por quantidade, valor livre e
+    descrição na venda~~ ✅ concluído (2026-09-01) — o usuário passou a
+    tabela da loja, e ela não cabia no modelo antigo, onde `Produto` tinha
+    um preço e o total era `preço × quantidade`:
+    - **Pote 1800 mL** 27,00 — levando 2 ou mais, TODOS a 25,00
+      (2 = 50,00, não 52,00);
+    - **Pote 1800 mL — Açaí** 33,00, preço fixo, mas **conta junto** pra
+      disparar o desconto do pote comum (1 de cada = 25,00 + 33,00);
+    - **Picolé** 3,00 avulso, 4 por 10,00, de 4 em 4 (5 = 13,00, 12 = 30,00);
+    - **Caixa** 120,00 e **Caixa — Açaí** 160,00;
+    - **SelfService** sem preço de tabela — o valor é digitado, é vendido
+      por peso.
+    Os 5 produtos que estavam na tela (Casquinha, Milk-shake, Sundae…) eram
+    exemplo e saíram, confirmado com o usuário.
+    - **No banco** (migration `precos_por_regra`): enum `RegraPreco`
+      (UNITARIO / ESCALONADO / PACOTE / LIVRE) e três campos em `Produto` —
+      `quantidadeRegra`, `precoRegra` e `grupoPreco`. Os dois primeiros são
+      reaproveitados pelas duas regras que precisam de número; o
+      `grupoPreco` é o que faz o açaí contar junto com o pote comum sem
+      mudar de preço (é gatilho da regra, não preço).
+    - **`ItemVenda` ganhou `subtotal`.** Com pacote, a linha deixou de ser
+      preço × quantidade: 6 picolés custam 16,00 e 16/6 não fecha em
+      centavos, então guardar só o unitário perderia dinheiro na conta. O
+      `precoUnitario` continua, como referência histórica. O
+      `produtosMaisVendidos` do dashboard passou a somar `subtotal` — antes
+      multiplicava e teria mostrado faturamento maior do que a loja
+      recebeu.
+    - **A migration faz backfill à mão** em vez de deixar o Prisma recusar:
+      a coluna entra opcional, recebe `precoUnitario × quantidade` (que era
+      exatamente o total da linha antes de existirem pacotes) e só então
+      vira NOT NULL. As vendas já registradas continuam valendo o mesmo.
+    - **`lib/precos.ts` é o cálculo, e é usado nos dois lados**: a tela
+      mostra o total enquanto o pedido é montado e a rota POST /api/vendas
+      refaz a mesma conta com os dados do banco antes de gravar. Tem que ser
+      refeito no servidor porque quem manda é ele — e porque uma linha
+      depende das outras (o gatilho do grupo).
+    - **A exceção do self-service** é a única parcela de preço que vem do
+      navegador, porque não existe em lugar nenhum antes de alguém pesar o
+      pote. A rota confere que o produto é mesmo LIVRE antes de aceitar um
+      valor, e recusa valor em produto de tabela — testado que mandar
+      `valor: 0.01` num pote responde 400.
+    - **`Venda.descricao`**: uma anotação por venda (nome do cliente,
+      observação), como o usuário escolheu — não uma por item.
+    - **`Produto.ordem`** (migration `ordem_do_produto`), achado testando: a
+      rota ordenava por nome, então a tecla 1 do atalho caiu na "Caixa" de
+      120,00 — o item mais raro e o erro de digitação mais caro. Agora a
+      ordem é a que o usuário listou, com o pote no 1.
+    - **Atalhos de teclado x campos de texto**: com o valor do self-service
+      e a descrição na tela, o listener global virou armadilha — digitar
+      "3" na descrição lançaria um picolé e o Enter fecharia a venda no meio
+      da frase. Agora ele ignora eventos vindos de `input`/`textarea`.
+    - Conferido caso a caso contra os números que o usuário deu (1/2/3
+      potes, 1/4/5/6/8/12 picolés, potes misturados com açaí, dois
+      self-services no mesmo pedido, pedido misto) — na função, na tela e na
+      venda gravada no banco.
+
 ## Convenções de código
 
 - Componentes em `/app` ou `/components`; acesso a dados via route handlers em `/app/api`
@@ -829,7 +885,9 @@ largura cheia com o documento rolando:
   coordenadas do mapa ainda são genéricos (`lib/estabelecimento.ts`).
 - **`/painel`** — a visão da equipe, atrás de login: Registrar venda,
   Falta no estoque ("em breve") e Dashboard (só DONO), trocadas por
-  categoria dentro da mesma página.
+  categoria dentro da mesma página. A tela de venda já usa a tabela de
+  preços real da loja (item 27), com desconto por quantidade, pacote de
+  picolé e valor digitado no self-service.
 
 Fora delas, só `/perfil`, `/login` e `/registrar`. Tudo que não é `/` (nem
 arquivo estático de `/public`) exige sessão, pelo `proxy.ts`. Login de

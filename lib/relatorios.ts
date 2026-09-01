@@ -141,7 +141,11 @@ export function calcularRelatorio(vendas: VendaComItens[]): Relatorio {
         total: 0,
       }
       atual.quantidade += item.quantidade
-      atual.total += Number(item.precoUnitario) * item.quantidade
+      // `subtotal` e não `precoUnitario × quantidade`: desde que existem
+      // pacotes (4 picolés por 10,00) a linha não é mais um preço vezes a
+      // quantidade, e a multiplicação daria um faturamento maior do que o
+      // que a loja recebeu.
+      atual.total += Number(item.subtotal)
       produtoMap.set(item.produtoId, atual)
     }
   }

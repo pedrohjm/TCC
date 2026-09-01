@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
 
   const produtos = await prisma.produto.findMany({
     where: ativo === undefined ? undefined : { ativo },
-    orderBy: { nome: 'asc' },
+    // Pela `ordem` primeiro: é ela que decide a numeração do atalho de
+    // teclado na tela de venda (ver o comentário no schema). O nome só
+    // desempata quem tiver a mesma ordem.
+    orderBy: [{ ordem: 'asc' }, { nome: 'asc' }],
   })
 
   return NextResponse.json(produtos)

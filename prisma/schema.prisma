@@ -27,6 +27,24 @@ enum StatusReserva {
   CANCELADA
 }
 
+// Como o preço de um produto é formado. O caso comum é UNITARIO
+// (preço × quantidade); os outros três existem porque a loja cobra assim:
+//
+// - ESCALONADO: a partir de `quantidadeRegra` unidades, cada uma passa a
+//   custar `precoRegra`. Ex.: pote de 1800 ml sai a 27,00 sozinho, mas
+//   levando 2 os DOIS saem a 25,00 (= 50,00, não 52,00).
+// - PACOTE: a cada `quantidadeRegra` unidades cobra-se `precoRegra`, e o
+//   que sobra sai pelo `preco` avulso. Ex.: picolé é 3,00 avulso e 4 por
+//   10,00 — então 5 picolés = 10,00 + 3,00 = 13,00 e 12 = 30,00.
+// - LIVRE: não tem preço de tabela; o valor é digitado na hora da venda.
+//   É o self-service, que é vendido por peso.
+enum RegraPreco {
+  UNITARIO
+  ESCALONADO
+  PACOTE
+  LIVRE
+}
+
 enum CategoriaSabor {
   DOCE
   FRUTA
@@ -45,9 +63,30 @@ model Usuario {
 }
 
 model Produto {
-  id         Int         @id @default(autoincrement())
-  nome       String
-  preco      Decimal     @db.Decimal(10, 2)
+  id    Int     @id @default(autoincrement())
+  nome  String
+  /// Preço avulso, de uma unidade. Nas regras PACOTE é o preço do que
+  /// sobra fora dos pacotes; na LIVRE não é usado (fica 0).
+  preco Decimal @db.Decimal(10, 2)
+
+  regraPreco      RegraPreco @default(UNITARIO)
+  /// ESCALONADO: a partir de quantas unidades a regra vale.
+  /// PACOTE: quantas unidades formam um pacote.
+  quantidadeRegra Int?
+  /// ESCALONADO: o preço unitário que passa a valer.
+  /// PACOTE: o preço de um pacote fechado.
+  precoRegra      Decimal?   @db.Decimal(10, 2)
+  /// Produtos com o mesmo grupo somam quantidade pra decidir se a regra
+  /// pegou. É o que faz o pote de açaí contar junto com o pote comum: 1 de
+  /// cada já são 2 potes, então o comum cai pra 25,00 — mas o açaí, que é
+  /// UNITARIO, continua no preço dele. Vale só como gatilho da regra.
+  grupoPreco      String?
+
+  /// Posição na tela de registrar venda. É por ela que sai a numeração do
+  /// atalho de teclado (1-9), então a ordem importa: o que mais sai fica
+  /// nos primeiros números. Em ordem alfabética a tecla 1 cairia na
+  /// "Caixa", de 120 reais, que é o item mais raro e o erro mais caro.
+  ordem      Int         @default(0)
   ativo      Boolean     @default(true)
   itensVenda ItemVenda[]
   createdAt  DateTime    @default(now())
@@ -58,6 +97,9 @@ model Venda {
   id             Int            @id @default(autoincrement())
   valorTotal     Decimal        @db.Decimal(10, 2)
   formaPagamento FormaPagamento
+  /// Anotação livre do balcão sobre o pedido inteiro (nome do cliente, o
+  /// que foi o self-service, alguma observação). Opcional.
+  descricao      String?
   dataHora       DateTime       @default(now())
   reservaId      Int?
   reserva        Reserva?       @relation(fields: [reservaId], references: [id])
@@ -75,7 +117,13 @@ model ItemVenda {
   produtoId     Int
   produto       Produto @relation(fields: [produtoId], references: [id])
   quantidade    Int
+  /// Preço de tabela na hora da venda, guardado pra referência histórica.
   precoUnitario Decimal @db.Decimal(10, 2)
+  /// Quanto essa linha custou de fato. Não dá pra derivar de
+  /// `precoUnitario × quantidade` desde que existem pacotes: 6 picolés
+  /// custam 16,00, e 16/6 não fecha em centavos. Quem manda no total da
+  /// venda é a soma dos subtotais.
+  subtotal      Decimal @db.Decimal(10, 2)
 }
 
 model Reserva {
