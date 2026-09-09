@@ -32,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...menos o modelo sem valores, que precisa ir junto pra quem clonar saber
+# quais variáveis o projeto usa.
+!.env.example
 
 # vercel
 .vercel
@@ -41,6 +44,12 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# Modelos/referências visuais que o usuário mandou (PDFs e prints de outros
+# sites, usados só como base pro design). Ficam na máquina, não no
+# repositório: são material de terceiros e não fazem parte do app —
+# o que veio de cada um está registrado no CLAUDE.md.
+/public/images/modelo/
 
 # prisma agent-editor skill bundles (auto-installed by `prisma init`, not app code)
 /.agents/

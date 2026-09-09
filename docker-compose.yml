@@ -1,13 +1,21 @@
+# Banco de desenvolvimento local. NÃO serve pra produção como está:
+# a porta fica exposta no host e não há TLS nem backup.
+#
+# A senha vem do .env (que não vai pro repositório) e não tem valor padrão
+# de propósito. Um padrão fraco embutido aqui funcionaria calado no dia em
+# que alguém subisse este arquivo num servidor — assim, sem a variável, o
+# compose recusa a subir e diz o que falta.
 services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: sellregister
-      POSTGRES_PASSWORD: sellregister
-      POSTGRES_DB: sellregister
+      POSTGRES_USER: ${POSTGRES_USER:?defina POSTGRES_USER no .env (veja .env.example)}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env (veja .env.example)}
+      POSTGRES_DB: ${POSTGRES_DB:?defina POSTGRES_DB no .env (veja .env.example)}
     ports:
-      - "5433:5432"
+      # 5433 no host pra não brigar com um Postgres já instalado na máquina.
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
 

@@ -859,6 +859,44 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       self-services no mesmo pedido, pedido misto) — na função, na tela e na
       venda gravada no banco.
 
+28. ~~Preparar o projeto pra virar repositório público no GitHub~~ ✅
+    concluído (2026-09-09) — auditoria antes de subir e os ajustes que ela
+    apontou. **`.env` nunca foi commitado** (conferido nos 47 commits do
+    histórico, não só no estado atual), e uma varredura do histórico inteiro
+    atrás de `AUTH_SECRET=`, connection string com senha, chave de API,
+    chave privada e token de GitHub/AWS não achou nada. Endereço,
+    coordenadas e usuários do seed são todos fictícios.
+    - **`public/images/modelo/` saiu do rastreamento** (`git rm --cached` +
+      entrada no `.gitignore`). São PDFs e prints dos sites que serviram de
+      referência visual — material de terceiros, que não deve ser
+      redistribuído, e que num TCC ainda pega mal ao lado do código. Os
+      arquivos continuam na máquina do usuário; o que veio de cada um está
+      registrado nos itens 8, 12, 13, 15 e 20 daqui.
+      **Atenção:** eles seguem no histórico. Se o repositório for publicado
+      com este histórico, continuam baixáveis — a limpeza de verdade é
+      `git filter-repo`, ou publicar começando um histórico novo.
+    - **Credenciais do Postgres saíram do `docker-compose.yml`** pras
+      variáveis `POSTGRES_*` do `.env`, **sem valor padrão** de propósito:
+      um padrão fraco embutido funcionaria calado no dia em que alguém
+      subisse o arquivo num servidor. Sem as variáveis o compose recusa a
+      subir e diz o que falta (testado). O valor local continua o mesmo, pra
+      não invalidar o volume `db_data` que já existe — `POSTGRES_PASSWORD`
+      só vale na criação do volume.
+    - **A senha `123456` do seed ficou como está.** Não é segredo: é dado
+      de teste fictício, existe pra ser fácil de digitar em dev e o próprio
+      arquivo avisa disso. Esconder daria trabalho e nenhuma segurança.
+    - **`.env.example`** documentando as 6 variáveis, com um `!.env.example`
+      no `.gitignore` — a regra `.env*` estava engolindo o próprio modelo.
+    - **README** reescrito (era o texto padrão do `create-next-app`):
+      problema que o sistema resolve, o que já funciona, stack, como rodar,
+      estrutura de pastas e o que falta. Os comandos foram testados, não
+      só escritos — `npx prisma db seed` roda mesmo.
+    - **LICENSE MIT** em nome do usuário.
+    - **Ficou em aberto por decisão dele:** o `/registrar` continua aberto a
+      qualquer visitante. Avisado de novo, e a resposta foi que o site ainda
+      não vai ao ar — o que fecha a questão por ora, mas precisa ser
+      resolvido antes de publicar (ver o aviso no README).
+
 ## Convenções de código
 
 - Componentes em `/app` ou `/components`; acesso a dados via route handlers em `/app/api`
