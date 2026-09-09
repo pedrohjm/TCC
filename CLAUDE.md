@@ -872,9 +872,20 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       redistribuído, e que num TCC ainda pega mal ao lado do código. Os
       arquivos continuam na máquina do usuário; o que veio de cada um está
       registrado nos itens 8, 12, 13, 15 e 20 daqui.
-      **Atenção:** eles seguem no histórico. Se o repositório for publicado
-      com este histórico, continuam baixáveis — a limpeza de verdade é
-      `git filter-repo`, ou publicar começando um histórico novo.
+      **O histórico também foi limpo**, com `git filter-repo --path
+      public/images/modelo/ --invert-paths` (2026-09-09): tirar do
+      rastreamento só valia dali pra frente, os arquivos seguiam baixáveis
+      por quem clonasse. O filtro por pasta pegou de quebra o
+      `modelo.pdf`, que já tinha saído lá no item 8 mas continuava no
+      histórico. Antes de rodar foram guardados um `git bundle --all` e uma
+      cópia crua do `.git` em `TCC/backup-git-antes-filter-repo/`, junto do
+      patch da alteração não commitada da landing (o filter-repo exige
+      árvore limpa e teria descartado ela).
+      Conferido depois: nenhum objeto desses arquivos sobrou em
+      `git rev-list --all --objects`, os 48 commits continuam lá, os
+      arquivos seguem na máquina do usuário e o `.git` caiu de 5,9 MB pra
+      1,3 MB. **Todos os SHAs mudaram** — é o esperado ao reescrever
+      histórico, e sem consequência porque o repositório nunca teve remote.
     - **Credenciais do Postgres saíram do `docker-compose.yml`** pras
       variáveis `POSTGRES_*` do `.env`, **sem valor padrão** de propósito:
       um padrão fraco embutido funcionaria calado no dia em que alguém
