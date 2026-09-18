@@ -139,7 +139,7 @@ export default async function PaginaPerfil({
 
         <button
           type="submit"
-          className="w-full rounded-lg bg-primary py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
+          className="w-full rounded-lg bg-primary-soft py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-soft/80"
         >
           Salvar
         </button>

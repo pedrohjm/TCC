@@ -395,7 +395,7 @@ export default function TelaRegistroVendas() {
               onClick={() => setFormaPagamento(forma.valor)}
               className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
                 formaPagamento === forma.valor
-                  ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                  ? 'border-primary bg-primary-soft text-primary-foreground shadow-sm'
                   : 'border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground'
               }`}
             >
@@ -434,7 +434,7 @@ export default function TelaRegistroVendas() {
           type="button"
           onClick={finalizarVenda}
           disabled={!podeFinalizar}
-          className="flex-1 rounded-lg bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
+          className="flex-1 rounded-lg bg-primary-soft py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-soft/90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
         >
           {enviando ? 'Registrando…' : 'Finalizar venda (Enter)'}
         </button>

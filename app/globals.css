@@ -34,6 +34,7 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
   --color-primary: var(--primary);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
@@ -55,15 +56,26 @@
    O amarelo tem um problema que o morango (paleta anterior, hue 18) não
    tinha: o tom da logo (#f0e010) dá 1,3:1 de contraste sobre branco — como
    texto, some. E `text-primary` é usado em 19 lugares (títulos em destaque,
-   links, rótulos em caixa alta). Então a cor se divide em dois papéis:
-   - `--primary` é um amarelo-ouro, oklch(0.65 0.15 78) ≈ #c08100: 3,3:1
-     sobre branco (mesma faixa do morango), serve pra texto grande/negrito,
-     borda, anel de foco e fundo de botão;
-   - o amarelo CLARO propriamente dito vai pros fundos — cabeçalho
-     (--sidebar), --muted, bordas e o degradê da página, que já nasce de
-     `primary/25`.
-   Botão amarelo pede texto ESCURO (5,3:1), não branco (3,3:1) — por isso
-   --primary-foreground mudou pra escuro. */
+   links, rótulos em caixa alta, a maioria `text-xs font-semibold` — 12px
+   não é "texto grande" pro WCAG nem em negrito, então precisaria de 4,5:1
+   pra valer AA de verdade). Por isso a cor amarela virou DOIS tokens, não
+   um só:
+   - `--primary`, oklch(0.65 0.15 78) ≈ #c08100 — o amarelo-ouro usado como
+     TEXTO (títulos, links, rótulos), borda, anel de foco e as séries do
+     gráfico. 3,3:1 sobre branco: mesma faixa do morango antigo, mas ainda
+     abaixo do ideal AA pros rótulos pequenos — ver o item do roadmap;
+   - `--primary-soft`, oklch(0.88 0.13 80) ≈ #ffce6d — o amarelo CLARO,
+     usado só como FUNDO de botão/chip com texto escuro em cima (o pedido
+     do usuário: "nesses botões que tem o texto preto, pode deixar um
+     amarelo claro"). 12,3:1 contra o texto escuro — de sobra. Ele não
+     serve pra texto: sobre branco dá só 1,2:1.
+   Os elementos puramente decorativos (ícone de mapa, seta do carrossel,
+   pontinho do gráfico) continuam em `--primary` — a troca foi só nos
+   botões/chips com palavra escrita, que é o que o pedido apontou.
+   O amarelo claro dos FUNDOS de página (cabeçalho, --muted, degradê) é
+   outro tom ainda, mais pálido — ver os tokens abaixo.
+   Botão claro pede texto ESCURO, não branco — por isso
+   --primary-foreground continua escuro. */
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.21 0.02 60);
@@ -73,6 +85,8 @@
   --popover-foreground: oklch(0.21 0.02 60);
   --primary: oklch(0.65 0.15 78);
   --primary-foreground: oklch(0.2 0.03 60);
+  /* só o fundo de botão/chip com texto escuro — nunca use como texto */
+  --primary-soft: oklch(0.88 0.13 80);
   --secondary: oklch(0.95 0.03 165);
   --secondary-foreground: oklch(0.25 0.05 165);
   --muted: oklch(0.97 0.015 90);
@@ -103,7 +117,10 @@
 
 /* No escuro o amarelo pode ser mais claro e mais vivo (0.8 de luminância):
    sobre fundo escuro ele tem contraste de sobra, e é aí que ele mais parece
-   com o da logo. */
+   com o da logo. Por isso aqui `--primary` já nasce claro o bastante pra
+   servir de texto E de fundo de botão ao mesmo tempo — `--primary-soft`
+   só existe pra dar o mesmo nome de token que o modo claro usa, sem
+   introduzir uma segunda cor (ninguém reclamou do escuro). */
 .dark {
   --background: oklch(0.19 0.015 60);
   --foreground: oklch(0.96 0 0);
@@ -113,6 +130,7 @@
   --popover-foreground: oklch(0.96 0 0);
   --primary: oklch(0.8 0.16 88);
   --primary-foreground: oklch(0.15 0.02 60);
+  --primary-soft: oklch(0.8 0.16 88);
   --secondary: oklch(0.3 0.03 165);
   --secondary-foreground: oklch(0.9 0.03 165);
   --muted: oklch(0.28 0.01 60);

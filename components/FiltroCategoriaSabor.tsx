@@ -29,7 +29,7 @@ export function FiltroCategoriaSabor({ categoriaAtiva, aoSelecionar }: FiltroCat
             className={cn(
               'rounded-full border px-3 py-1 text-sm font-medium transition-colors',
               categoriaAtiva === null
-                ? 'border-primary bg-primary text-primary-foreground'
+                ? 'border-primary bg-primary-soft text-primary-foreground'
                 : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
             )}
           >

@@ -75,7 +75,7 @@ export default async function PaginaLogin({
 
         <button
           type="submit"
-          className="w-full rounded-lg bg-primary py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          className="w-full rounded-lg bg-primary-soft py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-soft/90"
         >
           Entrar
         </button>

@@ -920,17 +920,35 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
     - **Paleta:** primária de morango (hue 18) pra amarelo. O amarelo tem um
       problema que o morango não tinha — o tom da logo (`#f0e010`) dá
       **1,3:1** de contraste sobre branco, e `text-primary` é usado em 19
-      lugares como texto. Medido com uma tabela de candidatos oklch → WCAG
-      em vez de chutar. A saída foi dividir a cor em dois papéis:
-      `--primary` é um **amarelo-ouro** oklch(0.65 0.15 78) ≈ `#c08100`
-      (3,3:1 sobre branco, mesma faixa do morango, serve pra texto
-      grande/negrito, borda, foco e botão), e o **amarelo claro** de fato
-      foi pros fundos: cabeçalho (`--sidebar`), `--muted`, bordas e o
-      degradê da página (que já nasce de `primary/25`).
-      **`--primary-foreground` mudou de branco pra escuro:** botão amarelo
-      com texto branco dá 3,3:1; com texto escuro, 5,3:1.
-      No escuro o amarelo sobe pra oklch(0.8 0.16 88) — sobre fundo escuro
-      ele pode ser vivo, e é aí que mais parece o da logo.
+      lugares como texto (a maioria `text-xs font-semibold`: 12px não é
+      "texto grande" pro WCAG nem em negrito, precisaria de 4,5:1 de
+      verdade). Medido com uma tabela de candidatos oklch → WCAG em vez de
+      chutar.
+      **A primeira tentativa foi um token só** (`--primary`) fazendo os dois
+      papéis — texto E fundo de botão — num meio-termo (oklch(0.65 0.15 78)
+      ≈ `#c08100`, 3,3:1 sobre branco). Mostrado ao usuário, ele achou os
+      botões escuros/difíceis de ler; clarear esse token ajudaria o botão
+      mas pioraria ainda mais o texto, que já estava abaixo do ideal — foi
+      quando virou **dois tokens**:
+      - `--primary`, oklch(0.65 0.15 78) ≈ `#c08100` — fica só pra TEXTO
+        (títulos, links, rótulos), borda, foco e as séries do gráfico;
+      - `--primary-soft`, oklch(0.88 0.13 80) ≈ `#ffce6d` — amarelo bem
+        claro, usado só como FUNDO nos botões/chips que têm palavra escrita
+        em cima (o pedido do usuário: "nesses botões que tem o texto preto,
+        pode deixar um amarelo claro"): `Button` variant `default`,
+        `Badge` variant `default`, os chips de categoria/forma de pagamento
+        selecionados e os botões de Entrar/Criar conta/Salvar/Finalizar
+        venda. 12,3:1 contra o texto escuro — bem folgado.
+      Ícone/ponto puramente decorativo (pino do mapa, seta do carrossel,
+      legenda do gráfico, divisor do "sobre nós") **ficou em `--primary`**,
+      não em `--primary-soft` — a troca foi só onde tem palavra escrita, que
+      foi o que o pedido apontou; não em todo `bg-primary` do projeto.
+      **`--primary-foreground` é escuro** (não branco): claro pede texto
+      escuro, e é o mesmo texto que já servia pro `--primary` antigo.
+      **No escuro nada mudou** — lá `--primary` já nasce claro (oklch(0.8
+      0.16 88)) o bastante pra servir de texto e de botão ao mesmo tempo,
+      então `--primary-soft` só repete o mesmo valor, sem introduzir uma
+      segunda cor onde não foi pedido.
     - `--chart-4` era amarelo e agora colidiria com a primária; virou o
       morango antigo. Menta (`--accent`/`--secondary`) e o vermelho de erro
       (`--destructive`) ficaram. A categoria "Doce" ser rosa

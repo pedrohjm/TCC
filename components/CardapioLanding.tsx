@@ -74,7 +74,7 @@ export function CardapioLanding() {
               className={cn(
                 'flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors',
                 ativo
-                  ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                  ? 'border-primary bg-primary-soft text-primary-foreground shadow-sm'
                   : 'border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground'
               )}
             >

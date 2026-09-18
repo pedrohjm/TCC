@@ -30,7 +30,7 @@ export function BlocoLocalizacao() {
           Confira nossa localização!
         </h3>
 
-        <span className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+        <span className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-primary-foreground">
           <MapPin className="h-4 w-4 shrink-0" />
           {ENDERECO_ESTABELECIMENTO}
         </span>
