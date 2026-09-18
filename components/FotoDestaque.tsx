@@ -55,7 +55,7 @@ export function FotoDestaque({
 
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/10 to-transparent" />
 
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-primary p-2.5 text-primary-foreground shadow-lg ring-4 ring-background/80 [&_svg]:h-5 [&_svg]:w-5">
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-primary-soft p-2.5 text-primary-foreground shadow-lg ring-4 ring-background/80 [&_svg]:h-5 [&_svg]:w-5">
         {iconeBadge}
       </div>
     </div>

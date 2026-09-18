@@ -939,16 +939,27 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
         `Badge` variant `default`, os chips de categoria/forma de pagamento
         selecionados e os botões de Entrar/Criar conta/Salvar/Finalizar
         venda. 12,3:1 contra o texto escuro — bem folgado.
-      Ícone/ponto puramente decorativo (pino do mapa, seta do carrossel,
-      legenda do gráfico, divisor do "sobre nós") **ficou em `--primary`**,
-      não em `--primary-soft` — a troca foi só onde tem palavra escrita, que
-      foi o que o pedido apontou; não em todo `bg-primary` do projeto.
+      Só o `bg-primary` sem nada escrito em cima (dot/legenda do gráfico
+      em `PainelDashboard.tsx`, o traço divisor e o pontinho de linha do
+      tempo em `about-us-section.tsx`) ficou em `--primary` — decorativo
+      puro, sem ícone nem texto, não é o que a foto de referência mostrava.
       **`--primary-foreground` é escuro** (não branco): claro pede texto
       escuro, e é o mesmo texto que já servia pro `--primary` antigo.
       **No escuro nada mudou** — lá `--primary` já nasce claro (oklch(0.8
       0.16 88)) o bastante pra servir de texto e de botão ao mesmo tempo,
       então `--primary-soft` só repete o mesmo valor, sem introduzir uma
       segunda cor onde não foi pedido.
+    - **Ajuste seguinte, no mesmo dia:** o usuário mandou um print do
+      distintivo do pino de mapa (`components/FotoDestaque.tsx`, o círculo
+      com ícone escuro sobre a foto de destaque) pedindo o mesmo amarelo
+      claro pra "ícones em preto" nesse estilo. A primeira leva só tinha
+      pego texto porque foi o que o pedido original citou; ícone dentro de
+      círculo colorido é o mesmo padrão visual, então entrou também:
+      o distintivo do mapa, o ícone da categoria em
+      `components/ui/standard-card.tsx` (ao passar o mouse) e as duas setas
+      do carrossel de avisos (mesmo arquivo, também no hover). O distintivo
+      de avatar (`components/ui/avatar.tsx`) seguiu o mesmo padrão por
+      consistência, embora não tenha uso hoje em nenhuma tela.
     - `--chart-4` era amarelo e agora colidiria com a primária; virou o
       morango antigo. Menta (`--accent`/`--secondary`) e o vermelho de erro
       (`--destructive`) ficaram. A categoria "Doce" ser rosa

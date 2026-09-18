@@ -79,7 +79,7 @@ function StandardCard({ item, indice }: { item: StandardCardItem; indice: number
       )}
 
       <div style={{ transform: 'translateZ(50px)' }} className="flex h-full flex-col">
-        <div className="mb-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-muted text-foreground shadow-sm transition-all duration-500 ease-out group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-lg">
+        <div className="mb-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-muted text-foreground shadow-sm transition-all duration-500 ease-out group-hover:bg-primary-soft group-hover:text-primary-foreground group-hover:shadow-lg">
           <Icone size={24} strokeWidth={1.4} />
         </div>
 
@@ -140,7 +140,7 @@ export function StandardCardCarousel({ itens, className }: StandardCardCarouselP
           type="button"
           onClick={() => rolar(-1)}
           aria-label="Ver avisos anteriores"
-          className="group rounded-full border border-border bg-card p-2.5 transition-colors duration-300 hover:bg-primary hover:text-primary-foreground"
+          className="group rounded-full border border-border bg-card p-2.5 transition-colors duration-300 hover:bg-primary-soft hover:text-primary-foreground"
         >
           <ChevronLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
         </button>
@@ -148,7 +148,7 @@ export function StandardCardCarousel({ itens, className }: StandardCardCarouselP
           type="button"
           onClick={() => rolar(1)}
           aria-label="Ver próximos avisos"
-          className="group rounded-full border border-border bg-card p-2.5 transition-colors duration-300 hover:bg-primary hover:text-primary-foreground"
+          className="group rounded-full border border-border bg-card p-2.5 transition-colors duration-300 hover:bg-primary-soft hover:text-primary-foreground"
         >
           <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
         </button>
