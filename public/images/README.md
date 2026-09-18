@@ -20,7 +20,7 @@ em `/images/logo/logo.png`).
   Picolés, Acompanhamentos, Bebidas) ainda são só "em breve", sem uso de
   imagem ainda.
 - `banners/estabelecimento.jpg` — foto da fachada/interior da loja, usada
-  no topo da página `/estabelecimento`. Sem esse arquivo, cai num fundo em
+  na seção "Contato" da home (`/`). Sem esse arquivo, cai num fundo em
   gradiente com o ícone da loja.
 - `banners/home.jpg` — foto do topo da home (`/`), mesmo formato e mesmo
   fallback da de cima (as duas usam `components/FotoDestaque.tsx`).
