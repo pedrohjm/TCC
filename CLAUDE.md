@@ -966,6 +966,52 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       (`lib/categorias-sabor.ts`) e cada botão do menu do celular ter sua
       cor são semânticos, não tema — só o "Início" do celular virou âmbar.
 
+30. ~~Sabores reais da loja, com foto, descrição e categorias — em arquivo
+    editável~~ ✅ concluído (2026-09-18) — o usuário mandou a lista dos 13
+    sabores de verdade (Abacaxi ao Vinho, Ameixa, Chiclete, Chocomenta,
+    Diplomata, Frutos do Bosque, Iogurte com Amora, Limão, Maracujá, Milho
+    Verde, Morango, Prestígio, Torta Alemã), cada um com descrição e
+    categoria, e as fotos em `public/images/cardapio/`. Pediu "um arquivo
+    separado pra ser fácil alterar depois", avisando que virão mais sabores.
+    - **`prisma/sabores.ts` é a fonte da verdade** — lista simples
+      `{ nome, descricao, categorias, foto }`, com as instruções de edição
+      no topo do próprio arquivo. **`npm run sabores`**
+      (`prisma/sincronizar-sabores.ts`) leva pro banco **pelo nome**: nome
+      que existe atualiza, nome novo cria, nome que sumiu da lista é
+      **desativado** (não apagado). Só mexe na tabela `Sabor` — foi o motivo
+      de não ser "edite o seed e rode de novo": o seed zera vendas,
+      produtos e usuários, e ninguém deve fazer isso numa loja em operação
+      pra acrescentar um sabor. O seed chama a mesma função, pra não haver
+      duas listas. Testado no banco com vendas: 11 criados, 2 atualizados
+      (Morango e Maracujá já existiam pelo nome), 7 antigos desativados,
+      **4 vendas intactas**. O script valida nome repetido e categoria vazia
+      (erro) e avisa foto que não existe em `public/` (o engano mais
+      provável).
+    - **`Sabor.categorias` virou lista** (`CategoriaSabor[]`), porque a
+      lista real tem gosto que é Fruta E Doce (Morango, Ameixa, Abacaxi ao
+      Vinho) ou Fruta E Azedo (Limão, Maracujá, Frutos do Bosque, Iogurte
+      com Amora). Migration `sabor_categorias_lista` converte o que já
+      existia em lista de um item. O filtro da API passou de "é" pra
+      "contém" (`categorias: { has }`), então Morango aparece tanto em
+      Fruta quanto em Doce — conferido: Doce 9, Fruta 7, Azedo 4. O cartão
+      mostra todas ("Fruta · Doce"), cada uma na sua cor; a **primeira** da
+      lista é a principal e dá o ícone de fallback da foto.
+      `Sabor.nome` ficou `@unique`: é a chave do sincronizador.
+    - **Fotos renomeadas pro padrão de URL** (`Torta Alemã.jpeg` →
+      `torta-alema.jpeg`): espaço e acento em URL precisam de encoding e
+      quebram em servidor Linux, que diferencia maiúscula. Só o nome mudou,
+      o conteúdo não. Os `.png` de foto (Morango, Ameixa, Frutos do Bosque,
+      fachada; ~1 MB cada) ficaram como vieram — converter pra JPEG foi
+      oferecido e não respondido, então não mexi.
+    - A fachada veio como `.png` e o código procurava `.jpg`
+      (`components/BlocoLocalizacao.tsx`); ajustado pro arquivo real.
+    - Uma correção de digitação no texto do usuário: "maceirado" →
+      "macerado" (Abacaxi ao Vinho).
+    - Testado no navegador: 13 fotos carregando de verdade (não fallback),
+      filtro por categoria, descrição no hover, fachada. Os únicos 404 de
+      imagem que restam são os banners que ainda não existem (`fundo.jpg`,
+      `home.jpg`, `sobre.jpg`), que caem no fallback como sempre.
+
 ## Convenções de código
 
 - Componentes em `/app` ou `/components`; acesso a dados via route handlers em `/app/api`

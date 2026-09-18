@@ -3,9 +3,11 @@ import { prisma } from '@/lib/prisma'
 
 const CATEGORIAS_VALIDAS = ['DOCE', 'FRUTA', 'AZEDO'] as const
 
-// Rota pública (sem exigirSessao): a tela de sabores fica em /cardapio,
-// que é acessível sem login — qualquer cliente navegando no cardápio
-// precisa conseguir ver os sabores disponíveis.
+// Rota pública (sem exigirSessao): o cardápio fica na home, que é
+// acessível sem login — qualquer cliente precisa conseguir ver os sabores.
+//
+// O filtro é "tem essa categoria", não "é dessa categoria": um sabor pode
+// estar em mais de uma (Morango é Fruta E Doce), e aparece nas duas.
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const categoria = searchParams.get('categoria')
@@ -20,7 +22,9 @@ export async function GET(request: NextRequest) {
   const sabores = await prisma.sabor.findMany({
     where: {
       ativo: true,
-      ...(categoria ? { categoria: categoria as (typeof CATEGORIAS_VALIDAS)[number] } : {}),
+      ...(categoria
+        ? { categorias: { has: categoria as (typeof CATEGORIAS_VALIDAS)[number] } }
+        : {}),
     },
     orderBy: { nome: 'asc' },
   })

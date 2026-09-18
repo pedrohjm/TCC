@@ -10,7 +10,8 @@ import { useImagemComFallback } from '@/hooks/use-imagem-com-fallback'
 export interface Sabor {
   id: number
   nome: string
-  categoria: CategoriaSaborValor
+  /** Uma ou mais. A primeira é a "principal": dá o ícone de fallback da foto. */
+  categorias: CategoriaSaborValor[]
   descricao: string
   foto: string | null
 }
@@ -66,12 +67,31 @@ function TagCategoria({ info }: { info: InfoCategoriaSabor }) {
   )
 }
 
+// Todas as categorias do sabor, lado a lado, cada uma na sua cor — o
+// cliente vê de cara que Morango é "Fruta · Doce".
+function TagsCategoria({ infos }: { infos: InfoCategoriaSabor[] }) {
+  return (
+    <span className="flex flex-wrap items-center gap-x-1.5">
+      {infos.map((info, indice) => (
+        <span key={info.valor} className="flex items-center gap-x-1.5">
+          {indice > 0 && <span className="text-[0.65rem] text-muted-foreground/60">·</span>}
+          <TagCategoria info={info} />
+        </span>
+      ))}
+    </span>
+  )
+}
+
 // Cartão com foto + tag + nome. Passando o mouse, abre uma janela pro lado
 // (nunca pra cima/baixo — ver collisionAvoidance em components/ui/hover-card.tsx)
 // no estilo do modelo em public/images/modelo/Mouse_Sabores.pdf: tag+nome
 // no topo, foto no meio, descrição embaixo.
 function CartaoSabor({ sabor }: { sabor: Sabor }) {
-  const info = CATEGORIAS_SABOR.find((categoria) => categoria.valor === sabor.categoria)!
+  // Mantém a ordem da lista em prisma/sabores.ts (a primeira é a principal).
+  const infos = sabor.categorias
+    .map((valor) => CATEGORIAS_SABOR.find((categoria) => categoria.valor === valor))
+    .filter((info): info is InfoCategoriaSabor => info !== undefined)
+  const principal = infos[0] ?? CATEGORIAS_SABOR[0]
 
   return (
     <HoverCard>
@@ -81,9 +101,9 @@ function CartaoSabor({ sabor }: { sabor: Sabor }) {
         closeDelay={100}
         className="cursor-default overflow-hidden rounded-lg border border-border transition-colors hover:border-primary/50"
       >
-        <FotoSabor src={sabor.foto} alt={sabor.nome} icone={info.icone} />
+        <FotoSabor src={sabor.foto} alt={sabor.nome} icone={principal.icone} />
         <div className="space-y-1 p-3">
-          <TagCategoria info={info} />
+          <TagsCategoria infos={infos} />
           <p className="text-sm leading-tight font-semibold">{sabor.nome}</p>
         </div>
       </HoverCardTrigger>
@@ -95,12 +115,12 @@ function CartaoSabor({ sabor }: { sabor: Sabor }) {
           <FotoSabor
             src={sabor.foto}
             alt={sabor.nome}
-            icone={info.icone}
+            icone={principal.icone}
             className="h-14 w-14 shrink-0 rounded-md"
             tamanhoIcone="h-6 w-6"
           />
           <div className="space-y-0.5">
-            <TagCategoria info={info} />
+            <TagsCategoria infos={infos} />
             <p className="text-sm leading-tight font-semibold">{sabor.nome}</p>
           </div>
         </div>

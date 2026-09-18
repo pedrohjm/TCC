@@ -3,6 +3,7 @@ import pg from 'pg'
 import bcrypt from 'bcryptjs'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../app/generated/prisma/client.js'
+import { sincronizarSabores } from './sincronizar-sabores.js'
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
@@ -177,71 +178,12 @@ async function main() {
   void caixa
   void caixaAcai
 
-  // Sabores dos potes de 1800ml — catálogo só pra exibição no cardápio
-  // público (/cardapio/sabores-1800ml), sem relação com Produto/Venda.
-  // Sem foto real ainda: o campo aponta pro caminho onde ela entraria
-  // (public/images/cardapio/<slug>.jpg) e a tela cai num ícone quando o
-  // arquivo não existe.
-  await prisma.sabor.createMany({
-    data: [
-      {
-        nome: 'Chocolate Belga',
-        categoria: 'DOCE',
-        descricao: 'Sorvete cremoso de chocolate belga meio amargo.',
-        foto: '/images/cardapio/chocolate-belga.jpg',
-      },
-      {
-        nome: 'Ninho com Nutella',
-        categoria: 'DOCE',
-        descricao: 'Leite ninho cremoso com mesclas de Nutella.',
-        foto: '/images/cardapio/ninho-nutella.jpg',
-      },
-      {
-        nome: 'Brigadeiro',
-        categoria: 'DOCE',
-        descricao: 'Sabor de brigadeiro caseiro com granulado.',
-        foto: '/images/cardapio/brigadeiro.jpg',
-      },
-      {
-        nome: 'Morango',
-        categoria: 'FRUTA',
-        descricao: 'Sorvete de morango com pedaços da fruta.',
-        foto: '/images/cardapio/morango.jpg',
-      },
-      {
-        nome: 'Manga',
-        categoria: 'FRUTA',
-        descricao: 'Polpa de manga bem madura, sabor tropical.',
-        foto: '/images/cardapio/manga.jpg',
-      },
-      {
-        nome: 'Maracujá',
-        categoria: 'FRUTA',
-        descricao: 'Sorvete de maracujá com um leve toque azedinho.',
-        foto: '/images/cardapio/maracuja.jpg',
-      },
-      {
-        nome: 'Limão Siciliano',
-        categoria: 'AZEDO',
-        descricao: 'Bem azedo e refrescante, com raspas de limão siciliano.',
-        foto: '/images/cardapio/limao-siciliano.jpg',
-      },
-      {
-        nome: 'Tangerina',
-        categoria: 'AZEDO',
-        descricao: 'Sabor cítrico e ácido de tangerina.',
-        foto: '/images/cardapio/tangerina.jpg',
-      },
-      {
-        nome: 'Framboesa',
-        categoria: 'AZEDO',
-        descricao: 'Acidez marcante da framboesa, equilibrada com o creme.',
-        foto: '/images/cardapio/framboesa.jpg',
-      },
-    ],
-  })
+  // Sabores dos potes de 1800 ml — a lista mora em prisma/sabores.ts, e o
+  // mesmo sincronizador que roda no `npm run sabores` é usado aqui, pra o
+  // seed e o dia a dia nunca divergirem.
+  const { criados: sabores } = await sincronizarSabores(prisma)
 
-  console.log('Seed concluído: 2 usuários, 6 produtos, 2 reservas, 4 vendas, 1 fechamento de caixa, 9 sabores.')
+  console.log(`Seed concluído: 2 usuários, 6 produtos, 2 reservas, 4 vendas, 1 fechamento de caixa, ${sabores} sabores.`)
   console.log(`Login de teste: ana@sorveteria.com / joao@sorveteria.com — senha "${SENHA_TESTE}"`)
 }
 

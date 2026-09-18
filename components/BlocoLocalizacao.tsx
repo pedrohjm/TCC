@@ -19,7 +19,7 @@ export function BlocoLocalizacao() {
   return (
     <Card className="mx-auto w-full max-w-2xl gap-0 overflow-hidden py-0">
       <FotoDestaque
-        src="/images/banners/estabelecimento.jpg"
+        src="/images/banners/estabelecimento.png"
         alt="Fachada da Q10 Sorvetes"
         iconeFallback={<Store />}
         iconeBadge={<MapPin />}

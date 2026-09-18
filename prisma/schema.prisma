@@ -138,17 +138,24 @@ model Reserva {
 
 // Sabores disponíveis nos potes de 1800 ml — puramente informativo pro
 // cliente ver o que tem em estoque. É um catálogo separado do Produto:
-// Produto é o que entra no carrinho da venda (Casquinha, Sundae...),
-// Sabor é só "qual gosto de sorvete tem hoje", sem preço nem venda direta.
+// Produto é o que entra no carrinho da venda (pote, picolé...), Sabor é só
+// "qual gosto de sorvete tem hoje", sem preço nem venda direta.
+//
+// A lista em si mora em prisma/sabores.ts (é lá que se edita, e
+// `npm run sabores` traz pro banco sem mexer no resto).
 model Sabor {
-  id        Int            @id @default(autoincrement())
-  nome      String
-  categoria CategoriaSabor
-  descricao String
-  foto      String?
-  ativo     Boolean        @default(true)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  id   Int    @id @default(autoincrement())
+  /// Único porque é a chave pela qual prisma/sabores.ts atualiza o banco:
+  /// mesmo nome = mesmo sabor, atualiza; nome novo = sabor novo.
+  nome String @unique
+  /// Lista, não valor único: "Morango" é Fruta E Doce, "Limão" é Fruta E
+  /// Azedo. O filtro do cardápio mostra o sabor em qualquer uma delas.
+  categorias CategoriaSabor[]
+  descricao  String
+  foto       String?
+  ativo      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model FechamentoCaixa {

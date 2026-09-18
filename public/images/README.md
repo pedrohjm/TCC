@@ -14,15 +14,15 @@ em `/images/logo/logo.png`).
   Windows não faz diferença, mas em produção (Linux) faz.
 - `banners/fundo.jpg` — imagem de fundo atrás da "janela" do app
   (`components/FundoPagina.tsx`). Sem esse arquivo, cai num gradiente.
-- `cardapio/` — fotos dos sabores/produtos. A tela de Sabores 1800ml já usa
-  isso de verdade: os nomes esperados (definidos em `prisma/seed.ts`) são
-  `chocolate-belga.jpg`, `ninho-nutella.jpg`, `brigadeiro.jpg`, `morango.jpg`,
-  `manga.jpg`, `maracuja.jpg`, `limao-siciliano.jpg`, `tangerina.jpg` e
-  `framboesa.jpg`. Sem o arquivo, o card cai num ícone da categoria (Doce/
-  Fruta/Azedo) em vez de quebrar. As outras categorias (SelfService,
-  Picolés, Acompanhamentos, Bebidas) ainda são só "em breve", sem uso de
-  imagem ainda.
-- `banners/estabelecimento.jpg` — foto da fachada/interior da loja, usada
+- `cardapio/` — fotos dos sabores de 1800 ml. **Quem manda é
+  `prisma/sabores.ts`**: cada sabor de lá diz o nome do arquivo que espera
+  aqui (campo `foto`). Pra adicionar um sabor: foto aqui + bloco novo lá +
+  `npm run sabores`. Nome de arquivo sem espaço nem acento (vira URL —
+  `torta-alema.jpeg`, não `Torta Alemã.jpeg`). Sem o arquivo, o card cai
+  num ícone da categoria em vez de quebrar. As outras categorias
+  (SelfService, Picolés, Acompanhamentos, Bebidas) ainda são só "em breve",
+  sem uso de imagem ainda.
+- `banners/estabelecimento.png` — foto da fachada/interior da loja, usada
   na seção "Contato" da home (`/`). Sem esse arquivo, cai num fundo em
   gradiente com o ícone da loja.
 - `banners/home.jpg` — foto do topo da home (`/`), mesmo formato e mesmo
