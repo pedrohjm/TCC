@@ -50,7 +50,6 @@ export default function Home() {
           <span className="mb-2 text-xs font-semibold tracking-widest text-primary uppercase">
             Venha nos visitar
           </span>
-          <h2 className="font-heading text-2xl font-semibold text-balance sm:text-3xl">Contato</h2>
         </div>
 
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
