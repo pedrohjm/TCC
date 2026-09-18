@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { LayoutDashboard, ShoppingCart, UserCog } from 'lucide-react'
 import { auth, signOut } from '@/auth'
-import { LogoBandeira } from '@/components/LogoBandeira'
+import { LogoTopo } from '@/components/LogoTopo'
 import { NavSecoes } from '@/components/NavSecoes'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
@@ -31,7 +31,7 @@ export async function CabecalhoTopo({ comNavSecoes = false }: CabecalhoTopoProps
           borda da janela do navegador. */}
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2">
         <Link href="/" className="flex shrink-0 items-center py-1" aria-label="Q10 Sorvetes">
-          <LogoBandeira />
+          <LogoTopo />
         </Link>
 
         {/* No celular o menu de seções não cabe na mesma linha da logo:

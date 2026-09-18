@@ -908,6 +908,35 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       não vai ao ar — o que fecha a questão por ora, mas precisa ser
       resolvido antes de publicar (ver o aviso no README).
 
+29. ~~Logo solta no topo e paleta amarela no lugar da morango~~ ✅ concluído
+    (2026-09-18) — dois pedidos do usuário, com referência em
+    `public/images/modelo/ideiaLogo.png` (fora do repositório, ver item 28).
+    - **Logo:** saiu a "bandeira" (hexágono em duas camadas) e ficou só a
+      imagem, maior. `LogoBandeira.tsx` virou `LogoTopo.tsx`. O detalhe que
+      importava: o PNG era 500×500 com a oval ocupando 45% da altura — a
+      logo saía miúda por mais que a caixa crescesse. **O arquivo foi
+      recortado rente à oval** (493×237, medido pelos pixels não
+      transparentes com `sharp`); o original está no histórico do git.
+    - **Paleta:** primária de morango (hue 18) pra amarelo. O amarelo tem um
+      problema que o morango não tinha — o tom da logo (`#f0e010`) dá
+      **1,3:1** de contraste sobre branco, e `text-primary` é usado em 19
+      lugares como texto. Medido com uma tabela de candidatos oklch → WCAG
+      em vez de chutar. A saída foi dividir a cor em dois papéis:
+      `--primary` é um **amarelo-ouro** oklch(0.65 0.15 78) ≈ `#c08100`
+      (3,3:1 sobre branco, mesma faixa do morango, serve pra texto
+      grande/negrito, borda, foco e botão), e o **amarelo claro** de fato
+      foi pros fundos: cabeçalho (`--sidebar`), `--muted`, bordas e o
+      degradê da página (que já nasce de `primary/25`).
+      **`--primary-foreground` mudou de branco pra escuro:** botão amarelo
+      com texto branco dá 3,3:1; com texto escuro, 5,3:1.
+      No escuro o amarelo sobe pra oklch(0.8 0.16 88) — sobre fundo escuro
+      ele pode ser vivo, e é aí que mais parece o da logo.
+    - `--chart-4` era amarelo e agora colidiria com a primária; virou o
+      morango antigo. Menta (`--accent`/`--secondary`) e o vermelho de erro
+      (`--destructive`) ficaram. A categoria "Doce" ser rosa
+      (`lib/categorias-sabor.ts`) e cada botão do menu do celular ter sua
+      cor são semânticos, não tema — só o "Início" do celular virou âmbar.
+
 ## Convenções de código
 
 - Componentes em `/app` ou `/components`; acesso a dados via route handlers em `/app/api`

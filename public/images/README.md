@@ -4,9 +4,12 @@ Pasta pra colocar as imagens usadas no cardápio/site. Tudo aqui vira uma URL
 pública em `/images/...` (ex.: `public/images/logo/logo.png` fica acessível
 em `/images/logo/logo.png`).
 
-- `logo/Logo.png` — logo da Q10 Sorvetes, usada no topo da janela
-  (`app/layout.tsx`). Enquanto o arquivo não existir (ou tiver outro nome),
-  aparece um ícone de loja no lugar (fallback automático, não quebra nada).
+- `logo/Logo.png` — logo da Q10 Sorvetes, solta na barra do topo
+  (`components/LogoTopo.tsx`). O arquivo está **recortado rente à oval**
+  (493×237): o original era 500×500 com a oval ocupando menos da metade da
+  altura, e por isso a logo saía miúda por mais que a caixa crescesse. Se
+  trocar o arquivo, recorte as margens transparentes antes. Enquanto ele não
+  existir (ou tiver outro nome), aparece um ícone de loja no lugar.
   Atenção ao nome exato do arquivo (`Logo.png`, com L maiúsculo) — no
   Windows não faz diferença, mas em produção (Linux) faz.
 - `banners/fundo.jpg` — imagem de fundo atrás da "janela" do app

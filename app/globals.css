@@ -48,76 +48,94 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Paleta "sorveteria": morango (primary), menta (accent) e creme (fundo do
-   sidebar) — repaginação do tema neutro padrão do shadcn para o contexto do
-   negócio, mantendo a mesma estrutura de tokens (fácil trocar depois). */
+/* Paleta "sorveteria": amarelo da logo (primary), menta (accent) e creme
+   amarelado nos fundos — repaginação do tema neutro padrão do shadcn para o
+   contexto do negócio, mantendo a mesma estrutura de tokens.
+
+   O amarelo tem um problema que o morango (paleta anterior, hue 18) não
+   tinha: o tom da logo (#f0e010) dá 1,3:1 de contraste sobre branco — como
+   texto, some. E `text-primary` é usado em 19 lugares (títulos em destaque,
+   links, rótulos em caixa alta). Então a cor se divide em dois papéis:
+   - `--primary` é um amarelo-ouro, oklch(0.65 0.15 78) ≈ #c08100: 3,3:1
+     sobre branco (mesma faixa do morango), serve pra texto grande/negrito,
+     borda, anel de foco e fundo de botão;
+   - o amarelo CLARO propriamente dito vai pros fundos — cabeçalho
+     (--sidebar), --muted, bordas e o degradê da página, que já nasce de
+     `primary/25`.
+   Botão amarelo pede texto ESCURO (5,3:1), não branco (3,3:1) — por isso
+   --primary-foreground mudou pra escuro. */
 :root {
   --background: oklch(1 0 0);
-  --foreground: oklch(0.205 0.02 30);
+  --foreground: oklch(0.21 0.02 60);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.205 0.02 30);
+  --card-foreground: oklch(0.21 0.02 60);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.205 0.02 30);
-  --primary: oklch(0.62 0.19 18);
-  --primary-foreground: oklch(0.985 0 0);
+  --popover-foreground: oklch(0.21 0.02 60);
+  --primary: oklch(0.65 0.15 78);
+  --primary-foreground: oklch(0.2 0.03 60);
   --secondary: oklch(0.95 0.03 165);
   --secondary-foreground: oklch(0.25 0.05 165);
-  --muted: oklch(0.97 0.01 40);
-  --muted-foreground: oklch(0.5 0.02 40);
+  --muted: oklch(0.97 0.015 90);
+  --muted-foreground: oklch(0.5 0.025 70);
   --accent: oklch(0.9 0.06 165);
   --accent-foreground: oklch(0.2 0.06 165);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.01 40);
-  --input: oklch(0.92 0.01 40);
-  --ring: oklch(0.62 0.19 18);
-  --chart-1: oklch(0.62 0.19 18);
+  --border: oklch(0.92 0.02 90);
+  --input: oklch(0.92 0.02 90);
+  --ring: oklch(0.65 0.15 78);
+  --chart-1: oklch(0.65 0.15 78);
   --chart-2: oklch(0.75 0.13 165);
-  --chart-3: oklch(0.55 0.14 60);
-  --chart-4: oklch(0.8 0.14 90);
+  --chart-3: oklch(0.55 0.14 40);
+  /* era amarelo (0.8 0.14 90) — com a primária agora amarela, virou o
+     morango antigo, senão duas séries do gráfico ficariam iguais */
+  --chart-4: oklch(0.62 0.19 18);
   --chart-5: oklch(0.55 0.18 280);
   --radius: 0.75rem;
-  --sidebar: oklch(0.98 0.015 50);
-  --sidebar-foreground: oklch(0.205 0.02 30);
-  --sidebar-primary: oklch(0.62 0.19 18);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.93 0.05 18);
-  --sidebar-accent-foreground: oklch(0.35 0.15 18);
-  --sidebar-border: oklch(0.92 0.02 40);
-  --sidebar-ring: oklch(0.62 0.19 18);
+  --sidebar: oklch(0.985 0.025 95);
+  --sidebar-foreground: oklch(0.21 0.02 60);
+  --sidebar-primary: oklch(0.65 0.15 78);
+  --sidebar-primary-foreground: oklch(0.2 0.03 60);
+  --sidebar-accent: oklch(0.93 0.07 92);
+  --sidebar-accent-foreground: oklch(0.4 0.1 75);
+  --sidebar-border: oklch(0.92 0.03 90);
+  --sidebar-ring: oklch(0.65 0.15 78);
 }
 
+/* No escuro o amarelo pode ser mais claro e mais vivo (0.8 de luminância):
+   sobre fundo escuro ele tem contraste de sobra, e é aí que ele mais parece
+   com o da logo. */
 .dark {
-  --background: oklch(0.19 0.015 30);
+  --background: oklch(0.19 0.015 60);
   --foreground: oklch(0.96 0 0);
-  --card: oklch(0.24 0.015 30);
+  --card: oklch(0.24 0.015 60);
   --card-foreground: oklch(0.96 0 0);
-  --popover: oklch(0.24 0.015 30);
+  --popover: oklch(0.24 0.015 60);
   --popover-foreground: oklch(0.96 0 0);
-  --primary: oklch(0.68 0.19 18);
-  --primary-foreground: oklch(0.15 0 0);
+  --primary: oklch(0.8 0.16 88);
+  --primary-foreground: oklch(0.15 0.02 60);
   --secondary: oklch(0.3 0.03 165);
   --secondary-foreground: oklch(0.9 0.03 165);
-  --muted: oklch(0.28 0.01 40);
-  --muted-foreground: oklch(0.7 0.01 40);
+  --muted: oklch(0.28 0.01 60);
+  --muted-foreground: oklch(0.7 0.01 60);
   --accent: oklch(0.32 0.05 165);
   --accent-foreground: oklch(0.9 0.05 165);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.68 0.19 18);
-  --chart-1: oklch(0.68 0.19 18);
+  --ring: oklch(0.8 0.16 88);
+  --chart-1: oklch(0.8 0.16 88);
   --chart-2: oklch(0.75 0.13 165);
-  --chart-3: oklch(0.7 0.14 60);
-  --chart-4: oklch(0.8 0.14 90);
+  --chart-3: oklch(0.7 0.14 40);
+  --chart-4: oklch(0.68 0.19 18);
   --chart-5: oklch(0.65 0.18 280);
-  --sidebar: oklch(0.22 0.02 30);
+  --sidebar: oklch(0.22 0.02 60);
   --sidebar-foreground: oklch(0.96 0 0);
-  --sidebar-primary: oklch(0.68 0.19 18);
-  --sidebar-primary-foreground: oklch(0.15 0 0);
-  --sidebar-accent: oklch(0.3 0.05 18);
+  --sidebar-primary: oklch(0.8 0.16 88);
+  --sidebar-primary-foreground: oklch(0.15 0.02 60);
+  --sidebar-accent: oklch(0.32 0.06 80);
   --sidebar-accent-foreground: oklch(0.96 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.68 0.19 18);
+  --sidebar-ring: oklch(0.8 0.16 88);
 }
 
 /* Esconde a barra de rolagem sem perder a rolagem em si — usada no

@@ -26,8 +26,9 @@ export function MenuMobile({ papel }: MenuMobileProps) {
       titulo: 'Início',
       icone: Home,
       href: '/',
-      gradienteDe: '#fda4af',
-      gradienteAte: '#fb7185',
+      // âmbar, a cor da marca desde que a paleta virou amarela
+      gradienteDe: '#fde68a',
+      gradienteAte: '#f59e0b',
       ativo: naHome,
     },
     // Âncoras: só destacam quando a pessoa já está na home; fora dela são
