@@ -17,7 +17,7 @@ async function limparBanco() {
   // Ordem respeita as chaves estrangeiras (dependentes primeiro).
   await prisma.itemVenda.deleteMany()
   await prisma.venda.deleteMany()
-  await prisma.reserva.deleteMany()
+  await prisma.encomenda.deleteMany()
   await prisma.produto.deleteMany()
   await prisma.usuario.deleteMany()
   await prisma.fechamentoCaixa.deleteMany()
@@ -61,6 +61,8 @@ async function main() {
         nome: 'Pote 1800 mL',
         preco: 27.0,
         ordem: 1,
+        // é o produto que a entrega de uma encomenda de POTE vira
+        tipoEncomenda: 'POTE',
         regraPreco: 'ESCALONADO',
         quantidadeRegra: 2,
         precoRegra: 25.0,
@@ -80,28 +82,14 @@ async function main() {
         precoRegra: 10.0,
       },
     }),
-    prisma.produto.create({ data: { nome: 'Caixa', preco: 120.0, ordem: 4 } }),
+    prisma.produto.create({
+      data: { nome: 'Caixa', preco: 120.0, ordem: 4, tipoEncomenda: 'CAIXA' },
+    }),
     prisma.produto.create({ data: { nome: 'Caixa — Açaí', preco: 160.0, ordem: 5 } }),
     prisma.produto.create({
       data: { nome: 'SelfService', preco: 0, regraPreco: 'LIVRE', ordem: 6 },
     }),
   ])
-
-  const reservaConcluida = await prisma.reserva.create({
-    data: {
-      nomeCliente: 'Pedro Alves',
-      data: new Date('2026-07-28T15:00:00'),
-      status: 'CONCLUIDA',
-    },
-  })
-
-  await prisma.reserva.create({
-    data: {
-      nomeCliente: 'Carla Lima',
-      data: new Date('2026-08-05T18:00:00'),
-      status: 'PENDENTE',
-    },
-  })
 
   // As vendas de exemplo cobrem de propósito uma regra de preço cada, pra
   // o dashboard ter número pra mostrar e pra dar pra conferir a conta.
@@ -125,7 +113,6 @@ async function main() {
       valorTotal: 13.0,
       formaPagamento: 'DINHEIRO',
       usuarioId: dona.id,
-      reservaId: reservaConcluida.id,
       itens: {
         create: [{ produtoId: picole.id, quantidade: 5, precoUnitario: 3.0, subtotal: 13.0 }],
       },
@@ -183,7 +170,36 @@ async function main() {
   // seed e o dia a dia nunca divergirem.
   const { criados: sabores } = await sincronizarSabores(prisma)
 
-  console.log(`Seed concluído: 2 usuários, 6 produtos, 2 reservas, 4 vendas, 1 fechamento de caixa, ${sabores} sabores.`)
+  // Duas encomendas de exemplo, uma em cada ponta do fluxo: uma esperando
+  // ser feita e outra pronta pra retirada. Entregues não entram porque
+  // entregar gera venda, e as vendas de exemplo acima já foram montadas
+  // à mão com valores conferidos.
+  const morango = await prisma.sabor.findUniqueOrThrow({ where: { nome: 'Morango' } })
+  const prestigio = await prisma.sabor.findUniqueOrThrow({ where: { nome: 'Prestígio' } })
+
+  await prisma.encomenda.createMany({
+    data: [
+      {
+        nomeCliente: 'Carla Lima',
+        saborId: morango.id,
+        tipo: 'POTE',
+        quantidade: 2,
+        dataEntrega: new Date('2026-08-05T12:00:00'),
+        status: 'PENDENTE',
+        observacao: 'Buscar no fim da tarde.',
+      },
+      {
+        nomeCliente: 'Pedro Alves',
+        saborId: prestigio.id,
+        tipo: 'CAIXA',
+        quantidade: 1,
+        dataEntrega: new Date('2026-08-02T12:00:00'),
+        status: 'FEITO',
+      },
+    ],
+  })
+
+  console.log(`Seed concluído: 2 usuários, 6 produtos, 2 encomendas, 4 vendas, 1 fechamento de caixa, ${sabores} sabores.`)
   console.log(`Login de teste: ana@sorveteria.com / joao@sorveteria.com — senha "${SENHA_TESTE}"`)
 }
 

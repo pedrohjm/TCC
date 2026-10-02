@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { criarVendaSchema } from '@/lib/validations/venda'
 import { calcularVenda, type ProdutoComRegra } from '@/lib/precos'
-import { exigirSessao } from '@/lib/auth-helpers'
+import { exigirSessao, exigirUsuarioDaSessao } from '@/lib/auth-helpers'
 import { limitesDoMes } from '@/lib/relatorios'
 
 const incluirRelacoes = {
   itens: { include: { produto: true } },
   usuario: { select: { id: true, nome: true } },
-  reserva: true,
+  encomenda: { select: { id: true, nomeCliente: true } },
 } as const
 
 export async function GET(request: NextRequest) {
@@ -57,7 +57,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { sessao, erro: erroSessao } = await exigirSessao()
+  // A venda fica no nome de quem registrou — o usuário tem que existir.
+  const { usuarioId, erro: erroSessao } = await exigirUsuarioDaSessao()
   if (erroSessao) return erroSessao
 
   const corpo = await request.json().catch(() => null)
@@ -70,15 +71,7 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const { formaPagamento, reservaId, descricao, itens } = resultado.data
-  const usuarioId = Number(sessao.user.id)
-
-  if (reservaId) {
-    const reserva = await prisma.reserva.findUnique({ where: { id: reservaId } })
-    if (!reserva) {
-      return NextResponse.json({ erro: 'Reserva não encontrada' }, { status: 400 })
-    }
-  }
+  const { formaPagamento, descricao, itens } = resultado.data
 
   const produtoIds = itens.map((item) => item.produtoId)
   const produtos = await prisma.produto.findMany({ where: { id: { in: produtoIds } } })
@@ -139,7 +132,6 @@ export async function POST(request: NextRequest) {
     data: {
       usuarioId,
       formaPagamento,
-      reservaId,
       descricao,
       valorTotal,
       itens: { create: linhas },

@@ -10,7 +10,6 @@ export const VALOR_LIVRE_MAXIMO = 9999.99
 
 export const criarVendaSchema = z.object({
   formaPagamento: z.enum(formasPagamento),
-  reservaId: z.number().int().positive().optional(),
   /** Anotação do balcão sobre o pedido inteiro. */
   descricao: z.string().trim().max(500, 'A descrição está longa demais').optional(),
   itens: z
@@ -31,13 +30,13 @@ export const criarVendaSchema = z.object({
 
 export type CriarVendaInput = z.infer<typeof criarVendaSchema>
 
-// Correção de dados já lançados: forma de pagamento errada, reserva
-// vinculada por engano ou a descrição. Trocar os itens de uma venda
-// existente não é suportado por aqui de propósito — o mais simples e claro
-// é apagar a venda e lançar de novo (ver DELETE /api/vendas/[id]).
+// Correção de dados já lançados: forma de pagamento errada ou a descrição.
+// Trocar os itens de uma venda existente não é suportado por aqui de
+// propósito — o mais simples e claro é apagar a venda e lançar de novo
+// (ver DELETE /api/vendas/[id]). O vínculo com a encomenda também não se
+// edita: ele é criado pela entrega e desfeito por ela.
 export const atualizarVendaSchema = z.object({
   formaPagamento: z.enum(formasPagamento).optional(),
-  reservaId: z.number().int().positive().nullable().optional(),
   descricao: z.string().trim().max(500).nullable().optional(),
 })
 

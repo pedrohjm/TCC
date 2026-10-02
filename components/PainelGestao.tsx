@@ -4,6 +4,7 @@ import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import type { Papel } from '@/app/generated/prisma/client'
 import { PainelEstoque } from '@/components/PainelEstoque'
+import TelaEncomendas from '@/components/TelaEncomendas'
 import TelaRegistroVendas from '@/components/TelaRegistroVendas'
 import { secoesDoPapel, type SecaoPainelId } from '@/lib/secoes-painel'
 import { cn } from '@/lib/utils'
@@ -114,6 +115,7 @@ export function PainelGestao({ papel, secaoInicial }: PainelGestaoProps) {
           buscando dados nem ocupando tela por trás. */}
       <div className="mx-auto w-full max-w-6xl px-0 py-6 md:px-4">
         {secaoAtiva.id === 'vendas' && <TelaRegistroVendas />}
+        {secaoAtiva.id === 'encomendas' && <TelaEncomendas />}
         {secaoAtiva.id === 'estoque' && <PainelEstoque />}
         {secaoAtiva.id === 'dashboard' && <PainelDashboard />}
       </div>

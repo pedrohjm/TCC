@@ -13,7 +13,9 @@ export interface Relatorio {
   /** `semana` é a data (AAAA-MM-DD) da segunda-feira daquela semana. */
   porSemana: { semana: string; total: number }[]
   produtosMaisVendidos: { produtoId: number; nome: string; quantidade: number; total: number }[]
-  reservas: { comReserva: number; semReserva: number }
+  /** Quantas vendas vieram da entrega de uma encomenda, e quantas foram
+   *  lançadas direto no balcão. */
+  encomendas: { comEncomenda: number; semEncomenda: number }
   heatmap: { diaSemana: number; hora: number; quantidade: number }[]
 }
 
@@ -112,7 +114,7 @@ export function calcularRelatorio(vendas: VendaComItens[]): Relatorio {
   const porSemanaMap = new Map<string, number>()
   const produtoMap = new Map<number, { nome: string; quantidade: number; total: number }>()
   const heatmapMap = new Map<string, number>()
-  let comReserva = 0
+  let comEncomenda = 0
 
   for (const venda of vendas) {
     const valor = Number(venda.valorTotal)
@@ -132,7 +134,9 @@ export function calcularRelatorio(vendas: VendaComItens[]): Relatorio {
     const chaveHeatmap = `${diaSemana}-${hora}`
     heatmapMap.set(chaveHeatmap, (heatmapMap.get(chaveHeatmap) ?? 0) + 1)
 
-    if (venda.reservaId) comReserva += 1
+    // `deEncomenda` e não `encomendaId`: a encomenda pode ter sido apagada
+    // na limpeza da lista, e isso não pode mudar um faturamento já fechado.
+    if (venda.deEncomenda) comEncomenda += 1
 
     for (const item of venda.itens) {
       const atual = produtoMap.get(item.produtoId) ?? {
@@ -181,7 +185,7 @@ export function calcularRelatorio(vendas: VendaComItens[]): Relatorio {
     porDia,
     porSemana,
     produtosMaisVendidos,
-    reservas: { comReserva, semReserva: totalVendas - comReserva },
+    encomendas: { comEncomenda, semEncomenda: totalVendas - comEncomenda },
     heatmap,
   }
 }

@@ -9,7 +9,7 @@ type Params = { params: Promise<{ id: string }> }
 const incluirRelacoes = {
   itens: { include: { produto: true } },
   usuario: { select: { id: true, nome: true } },
-  reserva: true,
+  encomenda: { select: { id: true, nomeCliente: true } },
 } as const
 
 function converterId(idTexto: string): number | null {
@@ -50,13 +50,6 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       { erro: 'Dados inválidos', detalhes: resultado.error.flatten() },
       { status: 400 }
     )
-  }
-
-  if (resultado.data.reservaId) {
-    const reserva = await prisma.reserva.findUnique({ where: { id: resultado.data.reservaId } })
-    if (!reserva) {
-      return NextResponse.json({ erro: 'Reserva não encontrada' }, { status: 400 })
-    }
   }
 
   try {

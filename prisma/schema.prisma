@@ -21,12 +21,6 @@ enum FormaPagamento {
   PIX
 }
 
-enum StatusReserva {
-  PENDENTE
-  CONCLUIDA
-  CANCELADA
-}
-
 // Como o preço de um produto é formado. O caso comum é UNITARIO
 // (preço × quantidade); os outros três existem porque a loja cobra assim:
 //
@@ -43,6 +37,23 @@ enum RegraPreco {
   ESCALONADO
   PACOTE
   LIVRE
+}
+
+// Encomenda: o cliente pede hoje e busca depois. Caixa ou pote — as duas
+// formas em que a loja vende sorvete encomendado.
+enum TipoEncomenda {
+  POTE
+  CAIXA
+}
+
+// O caminho de uma encomenda no balcão. O usuário pediu "Feito / Entregue",
+// mas descreveu o uso como "saber qual deveria ser feito ainda e qual já
+// está pronto pra retirada" — o "ainda não feito" é um terceiro estado, e
+// sem ele a tela não responderia justamente a primeira pergunta.
+enum StatusEncomenda {
+  PENDENTE
+  FEITO
+  ENTREGUE
 }
 
 enum CategoriaSabor {
@@ -82,6 +93,13 @@ model Produto {
   /// UNITARIO, continua no preço dele. Vale só como gatilho da regra.
   grupoPreco      String?
 
+  /// Qual tipo de encomenda este produto atende. É o que deixa a entrega
+  /// virar venda sem nome de produto escrito no código: ao entregar um
+  /// POTE, a venda sai no produto marcado com POTE, pelo preço de tabela
+  /// dele (inclusive as regras de quantidade de lib/precos.ts). Único
+  /// porque só pode haver um produto por tipo; null = não é encomendável.
+  tipoEncomenda TipoEncomenda? @unique
+
   /// Posição na tela de registrar venda. É por ela que sai a numeração do
   /// atalho de teclado (1-9), então a ordem importa: o que mais sai fica
   /// nos primeiros números. Em ordem alfabética a tecla 1 cairia na
@@ -101,8 +119,16 @@ model Venda {
   /// que foi o self-service, alguma observação). Opcional.
   descricao      String?
   dataHora       DateTime       @default(now())
-  reservaId      Int?
-  reserva        Reserva?       @relation(fields: [reservaId], references: [id])
+  /// Qual encomenda gerou esta venda. Vira null se a encomenda for apagada
+  /// na limpeza da lista — a venda continua, porque é registro de dinheiro.
+  /// Único: uma encomenda entregue vira exatamente uma venda (marcar
+  /// "entregue" duas vezes não duplica).
+  encomendaId Int?       @unique
+  encomenda   Encomenda? @relation(fields: [encomendaId], references: [id])
+  /// "Esta venda veio de uma encomenda", e continua verdade mesmo depois
+  /// que a encomenda for apagada. Sem isto, limpar a lista de entregues
+  /// mexeria no indicador do dashboard sem ninguém perceber.
+  deEncomenda Boolean @default(false)
   usuarioId      Int
   usuario        Usuario        @relation(fields: [usuarioId], references: [id])
   itens          ItemVenda[]
@@ -126,16 +152,6 @@ model ItemVenda {
   subtotal      Decimal @db.Decimal(10, 2)
 }
 
-model Reserva {
-  id          Int           @id @default(autoincrement())
-  nomeCliente String
-  data        DateTime
-  status      StatusReserva @default(PENDENTE)
-  vendas      Venda[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-}
-
 // Sabores disponíveis nos potes de 1800 ml — puramente informativo pro
 // cliente ver o que tem em estoque. É um catálogo separado do Produto:
 // Produto é o que entra no carrinho da venda (pote, picolé...), Sabor é só
@@ -154,8 +170,44 @@ model Sabor {
   descricao  String
   foto       String?
   ativo      Boolean  @default(true)
+  encomendas Encomenda[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+// Encomenda feita no balcão pra retirar depois. Substituiu o antigo model
+// `Reserva` (nome + data + status, sem produto), que nunca teve tela e
+// era um subconjunto disto — aqui importa o QUE foi pedido, porque é isso
+// que alguém precisa produzir.
+//
+// **Entregar gera a venda**: ao marcar ENTREGUE, a rota cria a Venda com o
+// produto correspondente ao `tipo` (ver `Produto.tipoEncomenda`), pelo
+// preço de tabela, e amarra as duas pelo `Venda.encomendaId`. Desfazer a
+// entrega apaga essa venda.
+model Encomenda {
+  id          Int    @id @default(autoincrement())
+  nomeCliente String
+  /// Qual sabor foi encomendado. Relação com o catálogo em vez de texto
+  /// solto: evita "morango"/"Morango"/"morago" virarem pedidos diferentes.
+  saborId Int
+  sabor   Sabor @relation(fields: [saborId], references: [id])
+  tipo    TipoEncomenda
+  /// Quantos potes/caixas do mesmo sabor — senão 3 potes virariam 3 linhas
+  /// iguais na lista de produção.
+  quantidade Int @default(1)
+  /// Quando o cliente vem buscar. É por ela que a lista se ordena: o que
+  /// vence antes aparece primeiro.
+  dataEntrega DateTime
+  status      StatusEncomenda @default(PENDENTE)
+  /// Recado do pedido ("sem açúcar", "escrever Parabéns na tampa").
+  observacao String?
+  /// A venda gerada quando a encomenda foi entregue. Null enquanto não
+  /// foi. Desfazer a entrega apaga essa venda (ver o PATCH da rota).
+  venda Venda?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([status, dataEntrega])
 }
 
 model FechamentoCaixa {

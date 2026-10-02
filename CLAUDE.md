@@ -1012,6 +1012,56 @@ cliques, foco em teclado e lançamento ágil. Se for mais lenta, a loja não ado
       imagem que restam são os banners que ainda não existem (`fundo.jpg`,
       `home.jpg`, `sobre.jpg`), que caem no fallback como sempre.
 
+31. ~~Encomendas: aba nova no painel, Reserva removida, e entregar vira
+    venda~~ ✅ concluído (2026-10-02) — o usuário pediu um lugar pra
+    registrar encomenda (sabor, caixa/pote, data, nome, status) sabendo
+    "qual deveria ser feito ainda e qual já está pronto pra retirada", e
+    depois que a entrega virasse venda e que a Reserva antiga saísse.
+    - **Três status, não dois.** O pedido dizia "Feito / Entregue", mas a
+      descrição do uso exigia o "ainda não feito": ficou
+      **PENDENTE → FEITO → ENTREGUE**, um botão por linha (o próximo passo)
+      e uma seta pra desfazer. A lista ordena por data de entrega, não por
+      cadastro — é uma fila de produção; atrasada aparece em vermelho no
+      topo ("atrasada 2 dias") e hoje/amanhã saem por extenso.
+    - **`Reserva` foi apagada** (model, 2 rotas, validação, seed). Era nome
+      + data + status, sem produto, nunca teve tela — um subconjunto de
+      Encomenda. `Venda.reservaId` virou `Venda.encomendaId`, e o indicador
+      "Vendas com reserva" do dashboard virou "Vendas de encomenda".
+    - **Entregar gera a venda.** O que isso trouxe: venda precisa de forma
+      de pagamento, que a encomenda não tem — então "Entregue" abre a
+      escolha (Dinheiro/Cartão/Pix) na própria linha em vez de agir direto.
+      O preço **não** é digitado: sai do produto marcado com aquele tipo
+      (`Produto.tipoEncomenda`, pra não ter nome de produto no código) e
+      passa pelo mesmo `lib/precos.ts` da tela de vendas — testado que 2
+      potes encomendados saem a R$ 50,00 (regra escalonada), não 54.
+      Tudo numa transação. Desfazer a entrega apaga a venda gerada.
+    - **`Venda.deEncomenda`** existe por causa da limpeza da lista: apagar
+      uma encomenda entregue zera o `encomendaId` (ON DELETE SET NULL), e
+      se o dashboard contasse por ele, limpar a tela mudaria faturamento já
+      fechado. O booleano sobrevive à limpeza.
+    - **Bugs achados testando, todos corrigidos:**
+      1. a encomenda atrasada ia pro fim da lista quando cadastrada sem
+         recarregar — a API ordenava certo, a inserção local não;
+      2. `GET /api/encomendas` não devolvia a venda (só o PATCH devolvia),
+         então o valor aparecia ao entregar e sumia no F5;
+      3. a confirmação ficava no topo da página, longe da lista — como
+         mudar de status tira a linha da aba atual, a tela parecia não ter
+         feito nada. Mensagens passaram pra junto da lista.
+    - **`exigirUsuarioDaSessao()`** (`lib/auth-helpers.ts`), achado por um
+      500 real no uso do usuário: a sessão é JWT e não consulta o banco,
+      então sobrevive ao usuário ser apagado — foi o que aconteceu ao rodar
+      o seed (que recria os usuários com ids novos) com alguém logado, e a
+      criação da venda estourou violação de chave estrangeira. Agora as
+      rotas que gravam `usuarioId` (venda no balcão e entrega de encomenda)
+      conferem antes e devolvem 401 "saia e entre de novo", sem gravar nada
+      pela metade. **Lição de operação: não rodar `prisma db seed` com
+      alguém logado.**
+    - Campos que o usuário não pediu e eu acrescentei, com aviso:
+      `quantidade` (senão 3 potes viram 3 linhas iguais) e `observacao`.
+      Apagar entregue mantém a venda; só a limpeza em lote
+      (`DELETE /api/encomendas?status=…`, botão "Limpar entregues") pede
+      confirmação, porque é irreversível.
+
 ## Convenções de código
 
 - Componentes em `/app` ou `/components`; acesso a dados via route handlers em `/app/api`
@@ -1037,8 +1087,8 @@ largura cheia com o documento rolando:
   Picolés, Acompanhamentos, Bebidas) mostram "em breve". O endereço e as
   coordenadas do mapa ainda são genéricos (`lib/estabelecimento.ts`).
 - **`/painel`** — a visão da equipe, atrás de login: Registrar venda,
-  Falta no estoque ("em breve") e Dashboard (só DONO), trocadas por
-  categoria dentro da mesma página. A tela de venda já usa a tabela de
+  **Encomendas**, Falta no estoque ("em breve") e Dashboard (só DONO),
+  trocadas por categoria dentro da mesma página. A tela de venda já usa a tabela de
   preços real da loja (item 27), com desconto por quantidade, pacote de
   picolé e valor digitado no self-service.
 

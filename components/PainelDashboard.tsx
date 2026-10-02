@@ -29,7 +29,7 @@ interface Relatorio {
   porSemana: { semana: string; total: number }[]
   porMes: { mes: string; total: number }[]
   produtosMaisVendidos: { produtoId: number; nome: string; quantidade: number; total: number }[]
-  reservas: { comReserva: number; semReserva: number }
+  encomendas: { comEncomenda: number; semEncomenda: number }
   heatmap: { diaSemana: number; hora: number; quantidade: number }[]
 }
 
@@ -233,10 +233,12 @@ export default function PainelDashboard() {
     relatorio?.heatmap.map((h) => [`${h.diaSemana}-${h.hora}`, h.quantidade]) ?? []
   )
 
-  const totalReservaBalcao = relatorio ? relatorio.reservas.comReserva + relatorio.reservas.semReserva : 0
-  const percentualReserva =
-    totalReservaBalcao > 0 && relatorio
-      ? Math.round((relatorio.reservas.comReserva / totalReservaBalcao) * 100)
+  const totalEncomendaBalcao = relatorio
+    ? relatorio.encomendas.comEncomenda + relatorio.encomendas.semEncomenda
+    : 0
+  const percentualEncomenda =
+    totalEncomendaBalcao > 0 && relatorio
+      ? Math.round((relatorio.encomendas.comEncomenda / totalEncomendaBalcao) * 100)
       : 0
 
   // Os três recortes do faturamento pedidos: mês, semana e dia. "Por mês"
@@ -315,8 +317,8 @@ export default function PainelDashboard() {
               icone={TrendingUp}
             />
             <CartaoIndicador
-              rotulo="Vendas com reserva"
-              valor={`${percentualReserva}%`}
+              rotulo="Vendas de encomenda"
+              valor={`${percentualEncomenda}%`}
               icone={CalendarDays}
             />
           </section>

@@ -1,7 +1,7 @@
 import type { CategoriaSabor } from '../app/generated/prisma/enums.js'
 
 // ============================================================================
-//  SABORES DO CARDÁPIO — é AQUI que se edita.
+//  SABORES DO CARDÁPIO.
 // ============================================================================
 //
 // Pra mudar uma descrição, trocar categoria ou ADICIONAR um sabor novo:

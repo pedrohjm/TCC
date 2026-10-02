@@ -1,7 +1,7 @@
-import { LayoutDashboard, PackageX, ShoppingCart, type LucideIcon } from 'lucide-react'
+import { ClipboardList, LayoutDashboard, PackageX, ShoppingCart, type LucideIcon } from 'lucide-react'
 import type { Papel } from '@/app/generated/prisma/client'
 
-export type SecaoPainelId = 'vendas' | 'estoque' | 'dashboard'
+export type SecaoPainelId = 'vendas' | 'encomendas' | 'estoque' | 'dashboard'
 
 export interface SecaoPainel {
   id: SecaoPainelId
@@ -23,6 +23,12 @@ export const SECOES_PAINEL: SecaoPainel[] = [
     rotulo: 'Registrar venda',
     descricao: 'Monte a comanda, escolha a forma de pagamento e feche a venda.',
     icone: ShoppingCart,
+  },
+  {
+    id: 'encomendas',
+    rotulo: 'Encomendas',
+    descricao: 'O que foi encomendado, o que falta fazer e o que já está pronto pra retirada.',
+    icone: ClipboardList,
   },
   {
     id: 'estoque',
